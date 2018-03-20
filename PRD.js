@@ -129,7 +129,7 @@ var PRD = (function IIFE() {
 		if ( input === null || input === undefined ) {
 			return ret;
 		}
-		if ( typeof input === 'string' ) {
+		if ( typeof input === 'string' || typeof input === 'number' || typeof input === 'boolean' ) {
 			ret = String( input );
 		}
 		if ( input instanceof Array ) {
