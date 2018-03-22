@@ -1,5 +1,10 @@
-// Simple module to assist on workflow development. 
-// Created to be imported in Overview > Global Scripts and used on both forms and engine.
+/**
+ * Simple module to assist on workflow development
+ * Created to be imported in Overview > Global Scripts and used on both forms and engine.
+ * @namespace PRD
+ * @version 1.0.1
+ * @license MIT License
+ */
 var PRD = (function IIFE() {
 	// Exported public API. Functions and variables not declared here will remain private to this module
 	var PublicAPI = {
@@ -8,33 +13,67 @@ var PRD = (function IIFE() {
 			logerror:logerror,
 			coerceToString:coerceToString
 		},
-		IDVget:IDVget
+		version:version,
+		IDVget:IDVget,
+		IDVglobalQuery:IDVglobalQuery
 	};
 
-	// Storage for the framework objects, only used when functions are called from inside a form.
-	// Not needed when code is running on the workflow engine.
+	/**
+	 * @namespace util
+	 * @memberof PRD
+	 */
+
+	/**
+	 * Storage for the framework objects, only used when functions are called from inside a form.
+	 * Not needed when code is running on the workflow engine.
+	 */
 	var IDMAPPS = {
 		field:null,
 		form:null,
 		IDVault:null
 	};
 
-	// Internal state, used to define what functions to export as well as 
-	// the behavior for functions that can be used in both form and engine.
+	/**
+	 * Internal state, used to define what functions to export as well as
+	 * the behavior for functions that can be used in both form and engine.
+	 */
 	var where = formOrEngine();
-	var logprefix = '';
+	var JSONobj;
+	// Setup a pointer to the JSON object since its name differs on forms and engine.
+	if ( where === 'engine' ) {
+		JSONobj = ScriptVault.JSON;
+	}
+	if ( where === 'form' ) {
+		JSONobj = JSON;
+	}
+
+	/**
+	 * Return module version
+	 *
+	 * @memberof PRD
+	 * @since 1.0.1
+	 *
+	 * @type {string}
+	 * @return {string} Module's version in the format M.m.p (Major, minor, patch)
+	 */
+	function version() {
+		return '1.0.1';
+	}
 
 	/**
 	 * Try to detect if we are in a web browser or in the User App/RBPM/IDMAPPs workflow engine.
 	 *
-	 * @type {object}
+	 * @memberof PRD.util
+	 * @since 1.0.0
+	 *
+	 * @type {string}
 	 * @return {string} 'form' if in a Browser, 'engine' if on the workflow engine. 'detection failed' otherwise.
 	 */
 	function formOrEngine() {
 		var res = 'Detection failed';
 		if ( typeof window === 'object' &&
 			'document' in window &&
-			typeof java === 'undefined' 
+			typeof java === 'undefined'
 		) {
 			res = 'form';
 		}
@@ -47,13 +86,16 @@ var PRD = (function IIFE() {
 		}
 		return res;
 	}
-	
+
 	/**
-	 * Output error message based on where the code is running. 
+	 * Output error message based on where the code is running.
 	 * Output to the console.log() if in a browser, to catalina.out if in the workflow engine.
 	 *
+	 * @memberof PRD.util
+	 * @since 1.0.0
+	 *
 	 * @param  {string} msg    Error message to be logged.
-	 * 
+	 *
 	 * @type {boolean}
 	 * @return {boolean} true if the message was returned successfully, false otherwise.
 	 */
@@ -84,8 +126,13 @@ var PRD = (function IIFE() {
 	}
 
 	/**
-	 * Initializes references to the IDMAPPs framework objects and save the same in the internal storage
-	 * 
+	 * Initializes references to the IDMAPPs framework objects and save the same in the internal storage.
+	 * Returns nothing.
+	 *
+	 * @function init
+	 * @memberof PRD
+	 * @since 1.0.0
+	 *
 	 * @param {object}  field    IDMAPPS framework field object
 	 * @param {object}  form     IDMAPPS framework form object
 	 * @param {object}  IDVault  IDMAPPS framework IDVault object
@@ -106,13 +153,19 @@ var PRD = (function IIFE() {
 
 	/**
 	 * Coerces the result to an ECMA string.
+	 * Coercion rules for this function:
 	 * If the first input parameter is null or undefined returns default value.
 	 * If the first input parameter is an Array it returns the array joined by " ".
+	 * If the first input parameter is a String, Number or Boolean it returns a string.
+	 * If the first input parameter is an object other than an Array it returns the default value.
 	 * If the second input value is not null then the default value becomes the second input value.
 	 *
-	 * @param  {(string|array)} input    Input parameter to be coerced.
-	 * @param  {string}         defVal  Default value to be used
-	 * 
+	 * @memberof PRD.util
+	 * @since 1.0.0
+	 *
+	 * @param  {any}     input     Input parameter to be coerced.
+	 * @param  {string}  [defVal]  Default value to be used
+	 *
 	 * @type {string}
 	 * @return {string} resulting string.
 	 */
@@ -120,9 +173,9 @@ var PRD = (function IIFE() {
 		var ret = "";
 		/* Throughout this function String() is used to guarantee that the string generated
 		 * is an ECMA string. This is only a concern on the workflow engine since the engine
-		 * allows a mix of ECMA and Java code. Returning a Java string will cause the 
+		 * allows a mix of ECMA and Java code. Returning a Java string will cause the
 		 * toJSON() function to fail when using JSON.stringify(), hence this safety.
-		 */  
+		 */
 		if ( defVal != null && typeof defVal === 'string' ) {
 			ret = String( defVal );
 		}
@@ -143,9 +196,12 @@ var PRD = (function IIFE() {
 	 * https://docs.oracle.com/javase/8/docs/api/java/util/Vector.html
 	 *
 	 * @param  {java.util.Vector} v   Java Vector.
-	 * 
-	 * @type {array}
-	 * @return {array} ECMA array.
+	 *
+	 * @memberof PRD.util
+	 * @since 1.0.0
+	 *
+	 * @type {string[]}
+	 * @return {string[]} ECMA array.
 	 */
 	function JavaVectorToECMAArray( v ) {
 		var it, res = [];
@@ -153,7 +209,7 @@ var PRD = (function IIFE() {
 			logerror( 'JavaVectorToECMAArray(): can only be used in the workflow engine.' );
 			return;
 		}
-		if ( v != null && 'size' in v && v.size() > 0 && 'iterator' in v ){
+		if ( v != null && typeof v === 'object' && v.size() > 0 ) {
 			try {
 				it = v.iterator();
 				while( it.hasNext() ) {
@@ -170,8 +226,11 @@ var PRD = (function IIFE() {
 	 * Converts a unidimensional ECMA array whose entries are strings to a Java Vector.
 	 * https://docs.oracle.com/javase/8/docs/api/java/util/Vector.html
 	 *
-	 * @param  {array} arr   ECMA array.
-	 * 
+	 * @memberof PRD.util
+	 * @since 1.0.0
+	 *
+	 * @param  {string[]} arr   ECMA array.
+	 *
 	 * @type {java.util.Vector}
 	 * @return {java.util.Vector} Java Vector.
 	 */
@@ -196,13 +255,16 @@ var PRD = (function IIFE() {
 	/**
 	 * Performs an IDVault.get and returns an ECMA array with the result.
 	 *
+	 * @memberof PRD
+	 * @since 1.0.0
+	 *
 	 * @param  {string} ldapdn    LDAP Fully Distinguised name of the eDirectory object to be queried.
 	 * @param  {string} entkey    DAL entity key.
 	 * @param  {string} attrkey   DAL attribute key. Attrribute must be configured under the DAL entity.
-	 * @param  {object} IDVobj    (form mode only) Dependency injection for framework 'IDVault' object.
-	 * 
-	 * @type {object}
-	 * @return {array} ECMA array with the results. Empty if IDVault.get returned null, array with one or more elements otherwise.
+	 * @param  {object} [IDVobj]  (form mode only) Dependency injection for framework 'IDVault' object. Not needed if in engine mode. Not needed if in form mode and the module has been initialized with PRD.init()
+	 *
+	 * @type {string[]}
+	 * @return {string[]} ECMA array with the results. Empty if IDVault.get returned null, array with one or more elements otherwise.
 	 */
 	function IDVget( ldapdn, entkey, attrkey, IDVobj ) {
 		// Variable declaration. Keep all the declarations together.
@@ -215,14 +277,14 @@ var PRD = (function IIFE() {
 		if ( where === 'form' && IDVobj == null && IDMAPPS.IDVault !== null ) {
 			IDVobj = IDMAPPS.IDVault;
 		}
-		// Check input parameters. 
+		// Check input parameters.
 		if ( ldapdn == null || entkey == null || attrkey == null || IDVobj == null ) {
 			errmsg = [];
-			errmsg.push( "PRD.IDVget() missing mandatory parameters." );
-			errmsg.push( "ldapdn: " + String( ldapdn ) + "," );
-			errmsg.push( "entkey: " + String( entkey ) + "," );
-			errmsg.push( "attrkey: " + String( attrkey ) + "," );
-			errmsg.push( "IDVobj: " + String( IDVobj ) + "." );
+			errmsg.push( 'PRD.IDVget() missing mandatory parameters.' );
+			errmsg.push( 'ldapdn: ' + String( ldapdn ) + ',' );
+			errmsg.push( 'entkey: ' + String( entkey ) + ',' );
+			errmsg.push( 'attrkey: ' + String( attrkey ) + ',' );
+			errmsg.push( 'IDVobj: ' + String( IDVobj ) + '.' );
 			logerror( errmsg.join( ' ' ) );
 			return qres;
 		}
@@ -256,6 +318,70 @@ var PRD = (function IIFE() {
 		return qres;
 	}
 
+	/**
+	 * Performs an IDVault.globalQuery and returns an object with the result.
+	 *
+	 * @memberof PRD
+	 * @since 1.0.1
+	 *
+	 * @param  {string} dalquerykey  DAL Query key.
+	 * @param  {object} parameters   ECMA object with the paramters defined in the DAL Query. {parametername:parametervalue}
+	 * @param  {object} [IDVobj]     (form mode only) Dependency injection for framework 'IDVault' object. Not needed if in engine mode. Not needed if in form mode and the module has been initialized with PRD.init()
+	 *
+	 * @type {string[]}
+	 * @return {string[]} Array with LDAP DNs returned.
+	 */
+	function IDVglobalQuery( dalquerykey, parameters, IDVobj ) {
+		// Variable declaration. Keep all the declarations together.
+		var qres = [];
+		var gqr, errmsg, pconv = '';
+		// Adjusting function input values based on where it is being executed.
+		if ( where === 'engine' ) {
+			IDVobj = IDVault;
+		}
+		if ( where === 'form' && IDVobj == null && IDMAPPS.IDVault !== null ) {
+			IDVobj = IDMAPPS.IDVault;
+		}
+		// Check input parameters.
+		if ( dalquerykey == null || parameters == null || IDVobj == null ) {
+			errmsg = [];
+			errmsg.push( 'PRD.IDVglobalQuery() missing mandatory parameters.' );
+			errmsg.push( 'dalquerykey: ' + String( dalquerykey ) + ',' );
+			if ( parameters === null ) {
+				pconv = String( parameters );
+			} else {
+				try {
+					pconv = JSONobj.stringify(parameters);
+				} catch ( e ) {
+					errmsg.push( 'failed to parse argument parameters into JSON, error: ' + e.message + ',');
+				}
+			}
+			errmsg.push( 'parameters: ' + pconv + ',' );
+			errmsg.push( 'IDVobj: ' + String( IDVobj ) + '.' );
+			logerror( errmsg.join( ' ' ) );
+			return qres;
+		}
+		// Performs the query and handles errors
+		try {
+			// Function call parameters are different between engine and form, as are return types.
+			if ( where === 'form' ) {
+				gqr = IDVobj.globalQuery( null, dalquerykey, parameters );
+				if ( gqr instanceof Array && gqr[ 0 ] instanceof Array > 0 && gqr[ 0 ][ 0 ] != '' ) {
+					qres = gqr[ 0 ];
+				}
+			}
+			if ( where === 'engine' ) {
+				gqr = IDVobj.globalQuery( dalquerykey, parameters );
+				if ( gqr != null && gqr.size() > 0 ) {
+					qres = JavaVectorToECMAArray( gqr );
+				}
+			}
+		} catch ( e ) {
+			logerror( 'IDVglobalQuery(): Error occured during IDVault.globalQuery . Aborting. Error message: ' + e.message );
+		}
+		return qres;
+	}
+
 	// Engine-only API extensions:
 	if ( where === 'engine' ) {
 		PublicAPI.util.JavaVectorToECMAArray = JavaVectorToECMAArray;
@@ -265,6 +391,6 @@ var PRD = (function IIFE() {
 	if ( where === 'form' ) {
 		PublicAPI.init = formInit;
 	}
-		
+
 	return PublicAPI;
 })();
