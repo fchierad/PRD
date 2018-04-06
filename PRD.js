@@ -5,7 +5,7 @@
  * @version 1.0.3
  * @license MIT License
  */
-var PRD = (function IIFE( logprefix ) {
+var PRD = (function IIFE( logprefix, verbosemsg ) {
   // Exported public API. Functions and variables not declared here will remain private to this module
   var PublicAPI = {
     util: {
@@ -13,10 +13,10 @@ var PRD = (function IIFE( logprefix ) {
       logerror:logerror,
       coerceToString:coerceToString,
       JSONobj: {
-        JSONparse:parse,
-        JSONstringify:stringify,
-        JSONget:get,
-        JSONtest:test
+        parse:JSONparse,
+        stringify:JSONstringify,
+        get:JSONget,
+        test:JSONtest
       }
     },
     setlogprefix:setlogprefix,
@@ -68,281 +68,24 @@ var PRD = (function IIFE( logprefix ) {
    */
   var where = formOrEngine();
   var JString; // Java string, used only on the workflow engine.
+  var JSONptr; // JSON internal pointer. If we evaluate it inside a function that function can cause form to fail to load.
+  var prefix; // prefix variable used by the logerror() calls.
+  var debug; // When set, functions will provide more verbose log messages
   if ( where === 'engine' ) {
     JString = java.lang.String;
+    JSONptr = ScriptVault.JSON;
   }
-  var prefix; // prefix variable used by the logerror() calls.
+  if ( where === 'form' ) {
+    JSONptr = JSON;
+  }
+  if (verbosemsg === true ) {
+    debug = true;
+  } else {
+    debug = false;
+  }
+
   // Initializes the prefix variable used by the logerror() calls.
   setlogprefix( logprefix );
-
-  /**
-   * Wrapper for the parse() call on the host environment's JSON object.
-   * See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/parse
-   *
-   * @function parse
-   * @memberof PRD.util.JSONobj
-   * @since 1.0.2
-   *
-   * @param {string}     s          String with valid JSON syntax
-   * @param {function=}  [reviver] (Optional) If a function, this prescribes how the value originally produced by parsing is transformed, before being returned.
-   *
-   * @type {object}
-   * @return {object} ECMA Object generated from the JSON string. On error return empty object and report the error via logerror()
-   */
-  function JSONparse( s, r ) {
-    var res, pointer;
-    // Setup a pointer to the JSON object since its name differs on forms and engine.
-    if ( where === 'engine' ) {
-      pointer = ScriptVault.JSON;
-    }
-    if ( where === 'form' ) {
-      pointer = JSON;
-    }
-    try {
-      res = pointer.parse( s, r );
-    } catch( e ){
-      logerror( 'Error during JSON parse(): ' + e.message );
-    }
-    if (! res ) {
-      return {};
-    }
-    return res;
-  }
-
-  /**
-   * Wrapper for the stringify() call on the host environment's JSON object.
-   * See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify
-   *
-   * @function stringify
-   * @memberof PRD.util.JSONobj
-   * @since 1.0.2
-   *
-   * @param {object}                        o           ECMA object to convert to JSON
-   * @param {(function|string[]|number[])=} [replacer]  (Optional) A function that alters the behavior of the stringification process, or an array of String and Number objects that serve as a whitelist for selecting/filtering the properties of the value object to be included in the JSON string. If this value is null or not provided, all properties of the object are included in the resulting JSON string
-   * @param {(string|number)=}              [space]     (Optional) A String or Number object that's used to insert white space into the output JSON string for readability purposes. If this is a Number, it indicates the number of space characters to use as white space; this number is capped at 10 (if it is greater, the value is just 10). Values less than 1 indicate that no space should be used. If this is a String, the string (or the first 10 characters of the string, if it's longer than that) is used as white space. If this parameter is not provided (or is null), no white space is used.
-   *
-   * @type {string}
-   * @return {string} Serialized ECMA object in JSON format. On error return empty string and report the error via logerror()
-   */
-  function JSONstringify( o, r, s ) {
-    var res, pointer;
-    // Setup a pointer to the JSON object since its name differs on forms and engine.
-    if ( where === 'engine' ) {
-      pointer = ScriptVault.JSON;
-    }
-    if ( where === 'form' ) {
-      pointer = JSON;
-    }
-    try {
-      res = pointer.stringify( o, r, s );
-    } catch( e ){
-      logerror( 'Error during JSON stringify(): ' + e.message );
-    }
-    if (! res ) {
-      return '';
-    }
-    return res;
-  }
-
-  /**
- * Verify if an ECMA object has the selected location.
- * Note: To reference properties with a dot in their name use the format ["property.name"] .
- *
- * Ported from IDM engine to RBPM. IDM Engine version at https://github.com/fchierad/IDM-ECMAlib/blob/v1.0.2/JSONlib-JS.js
- *
- * @function test
- * @memberof PRD.util.JSONobj
- * @since 1.0.3
- *
- * @param {(object|string)}  inputJSON    Input JSON (ECMA object). If a string-serialized JSON is provided it will be converted to a JSON object internally
- * @param {string}           whattotest   Dot-separated list of properties as if you are accessing them via ECMAscript
- *
- * @return {boolean} true if the path is found, false otherwise
- */
-function JSONtest( inputJSON, whattotest ) {
-  var fname, i, itval, itobj, JSONobj, getArr, propName;
-  fname = 'JSONtest(): ';
-  // Review input data
-  if ( typeof inputJSON === 'string' ) {
-    JSONobj = JSONparse( inputJSON );
-  } else {
-    JSONobj = inputJSON;
-  }
-  if ( typeof whattotest === 'string' ) {
-    getArr = charArrToPropertyNames( stringToCharArray( whattotest ) );
-  } else {
-    return false;
-  }
-  // Iterates through the object using itobj and itval as the middle steps to find the desired result
-  itobj = JSONobj;
-  for( i = 0; i < getArr.length; i++ ) {
-    propName = getArr[ i ];
-    if ( typeof itobj === 'object' && propName in itobj ) {
-      itval = itobj[ propName ];
-    } else {
-      return false;
-    }
-    itobj = itval;
-  }
-  return true;
-}
-
-/**
- * Retrieves a property of an ECMA object (or its subordinate object) and returns it in the specified type.
- * Note: To reference properties with a dot in their name use the format ["property.name"] .
- *
- * Ported from IDM engine to RBPM. IDM Engine version at https://github.com/fchierad/IDM-ECMAlib/blob/v1.0.2/JSONlib-JS.js
- *
- * @function get
- * @memberof PRD.util.JSONobj
- * @since 1.0.3
- *
- * @param {(object|string)}  inputJSON     Input JSON (ECMA object). If a string-serialized JSON is provided it will be converted to a JSON object internally
- * @param {string}           whattoget     Dot-separated list of properties as if you are accessing them via ECMAscript
- * @param {string=}          [returntype]  (Optional) Desired return type. Valid values are: string, number, raw. Defaults to raw in case whatever is provided is not one of the 3 valid options
- *
- * @return {(string|number|boolean|object)} Selected property's value in the selected format. If parsing of the object fails returns an empty string
- */
-function JSONget( inputJSON, whattoget, returntype ) {
-  var fname, i, itval, itobj, JSONobj, getArr, propName, res = '';
-  fname = 'JSONget(): ';
-  // Review input data
-  if ( typeof inputJSON === 'string' ) {
-    JSONobj = JSONparse( inputJSON );
-  } else {
-    JSONobj = inputJSON;
-  }
-  if ( typeof whattoget === 'string' ) {
-    getArr = charArrToPropertyNames( stringToCharArray( whattoget ) );
-  } else {
-    return res;
-  }
-  if ( returntype !== 'string' && returntype !== 'number' && returntype !== 'raw' ) {
-      returntype = 'raw';
-  }
-  // Iterates through the object using itobj and itval as the middle steps to find the desired result
-  itobj = JSONobj;
-  for( i = 0; i < getArr.length; i++ ) {
-    propName = getArr[ i ];
-    if ( typeof itobj === 'object' && propName in itobj ) {
-      itval = itobj[ propName ];
-    } else {
-      return res;
-    }
-    itobj = itval;
-  }
-  // Inspect returned data and coerce it as needed. No default set since res is set at the start of the function
-  switch ( returntype ) {
-    case 'string':
-      res = String( itval );
-      break;
-    case 'number':
-      res = parseInt( String( itval ), 10 );
-      break;
-    case 'raw':
-      res = itval;
-      break;
-  }
-  return res;
-}
-
-//  https://github.com/fchierad/IDM-ECMAlib/blob/v1.0.2/JSONlib-JS.md#JSONget
-
-  /**
-   * Unicode-safe split of a string to a character Array.
-   *
-   * Since IDM 4.5/IDM 4.6 does not have access to ES6 - therefore no spread ... operator - this function is needed.
-   * Once IDM supports the spread operator use that instead.
-   *
-   * Ported from IDM engine to RBPM. IDM Engine version at https://github.com/fchierad/IDM-ECMAlib/blob/v1.0.2/JSONlib-JS.js
-   *
-   * @since 1.0.3
-   * @private
-   * @param {string}  str   String input. Any other input will be coerced to string using String() and probably won't behave as expected
-   * @type {string[]}
-   * @return {string[]} Unicode-safe character array
-   */
-  function stringToCharArray( str ) {
-    var cArr = [], fname;
-    fname = 'stringToCharArray(): ';
-    try {
-      cArr = String( str ).split( /(?=(?:[\0-\t\x0B\f\x0E-\u2027\u202A-\uD7FF\uE000-\uFFFF]|[\uD800-\uDBFF][\uDC00-\uDFFF]|[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?:[^\uD800-\uDBFF]|^)[\uDC00-\uDFFF]))/ );
-    } catch( e ) {
-      logerror( fname + 'Failed to split the input string, error: ' + e.message );
-    }
-    return cArr;
-  }
-
-  /**
-   * JSON path parser. Iterates through a character array and returns an array with property names.
-   * Array indexes are purely numeric property names and will be returned as numbers, not strings.
-   * Character Array should have been split from the original ECMA object path that we want to parse.
-   *
-   * Ported from IDM engine to RBPM. IDM Engine version at https://github.com/fchierad/IDM-ECMAlib/blob/v1.0.2/JSONlib-JS.js
-   *
-   * @since 1.0.0
-   * @private
-   * @param {string[]}  str   Character string. Assumes each entry in the array is a single Unicode character
-   * @type {Array<(string|number)>}
-   * @return {Array<(string|number)>} property names array
-   */
-  function charArrToPropertyNames( cArr ) {
-    var i, fname, currentName, squaremark, re_whitespace, re_number, re_quotes, property = [];
-    fname = 'charArrToPropertyNames(): ';
-    if ( !( cArr instanceof Array ) ) {
-      logerror( fname + 'Input parameter is not an Array, aborting.' );
-      return property;
-    }
-    // Setup for parsing. Delimiter for property names are either dot or open and close square brackets
-    // If the contents inside square brackets are purely numeric then a number is returned
-    currentName = '';
-    re_number = /^\d+$/;
-    re_quotes = /^(['"])(.+)\1$/;
-    squaremark = ( cArr[ 0 ] === '[' )? 'first':'end'; //squaremark can be 'first', 'start', 'end'
-    // Iterates through the character array parsing elements into their own property array entry
-    for( i=0; i < cArr.length; i++ ) {
-      if ( squaremark === 'first' && cArr[ i ] === '[' ) {
-        squaremark = 'start';
-        continue;
-      }
-      if ( squaremark === 'end' && cArr[ i ] === '[' ) {
-        squaremark = 'start';
-        if ( currentName.trim() !== '' ) { // prevent double push on constructs like arr[0][0]
-          property.push( currentName.trim() );
-        }
-        currentName = '';
-        continue;
-      }
-      if ( squaremark === 'start' && cArr[ i ] === ']' ) {
-        squaremark = 'end';
-        currentName = currentName.trim();
-        // If the property name between [] is a pure number, coerces the string to a number
-        if ( re_number.test( currentName ) ) {
-          currentName = parseInt( currentName, 10 );
-        }
-        // Remove quotes around property name if they are present like obj["property name"], returning property name
-        if ( re_quotes.test( currentName ) ) {
-          currentName = re_quotes.exec( currentName )[2];
-        }
-        property.push( currentName );
-        currentName = '';
-        continue;
-      }
-      // Traditional . delimiter
-      if ( squaremark === 'end' && cArr[ i ] === '.' ) {
-        if ( currentName.trim() !== '' ) { // prevent double push on constructs like arr[0].name
-          property.push( currentName.trim() );
-        }
-        currentName = '';
-        continue;
-      }
-      currentName += cArr[ i ];
-    }
-    if ( currentName !== '' ) {
-      property.push( currentName.trim() );
-    }
-    return property;
-  }
 
   /**
    * Set prefix for the log activities generated by logerror() on both engine and form.
@@ -429,6 +172,19 @@ function JSONget( inputJSON, whattoget, returntype ) {
   }
 
   /**
+   * Output debug message via logerror() only if the internal variable debug is set to true
+   *
+   * @since 1.0.3
+   * @private
+   * @param {string}  str   String input.
+   */
+  function debugmsg( str ) {
+    if ( debug ) {
+      logerror( str );
+    }
+  }
+
+   /**
    * (Form only) Initializes references to the IDMAPPs framework objects and save the same in the internal storage.
    * Returns nothing.
    *
@@ -452,6 +208,275 @@ function JSONget( inputJSON, whattoget, returntype ) {
     if ( IDVault != null ) {
       IDMAPPS.IDVault = IDVault;
     }
+  }
+
+  /**
+   * Wrapper for the parse() call on the host environment's JSON object.
+   * See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/parse
+   *
+   * @function parse
+   * @memberof PRD.util.JSONobj
+   * @since 1.0.2
+   *
+   * @param {string}     s          String with valid JSON syntax
+   * @param {function=}  [reviver] (Optional) If a function, this prescribes how the value originally produced by parsing is transformed, before being returned.
+   *
+   * @type {object}
+   * @return {object} ECMA Object generated from the JSON string. On error return empty object and report the error via logerror()
+   */
+  function JSONparse( s, r ) {
+    var fname, res, pointer;
+    fname = 'JSONobj.parse(): ';
+    // Setup a pointer to the JSON object since its name differs on forms and engine.
+    pointer = JSONptr;
+    try {
+      res = pointer.parse( s, r );
+    } catch( e ){
+      logerror( fname + e.message );
+    }
+    if (! res ) {
+      debugmsg( fname + 'input processing resulted in a null value.' );
+      return {};
+    }
+    return res;
+  }
+
+  /**
+   * Wrapper for the stringify() call on the host environment's JSON object.
+   * See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify
+   *
+   * @function stringify
+   * @memberof PRD.util.JSONobj
+   * @since 1.0.2
+   *
+   * @param {object}                        o           ECMA object to convert to JSON
+   * @param {(function|string[]|number[])=} [replacer]  (Optional) A function that alters the behavior of the stringification process, or an array of String and Number objects that serve as a whitelist for selecting/filtering the properties of the value object to be included in the JSON string. If this value is null or not provided, all properties of the object are included in the resulting JSON string
+   * @param {(string|number)=}              [space]     (Optional) A String or Number object that's used to insert white space into the output JSON string for readability purposes. If this is a Number, it indicates the number of space characters to use as white space; this number is capped at 10 (if it is greater, the value is just 10). Values less than 1 indicate that no space should be used. If this is a String, the string (or the first 10 characters of the string, if it's longer than that) is used as white space. If this parameter is not provided (or is null), no white space is used.
+   *
+   * @type {string}
+   * @return {string} Serialized ECMA object in JSON format. On error return empty string and report the error via logerror()
+   */
+  function JSONstringify( o, r, s ) {
+    var fname, res, pointer;
+    fname = 'JSONobj.stringify(): ';
+    // Setup a pointer to the JSON object since its name differs on forms and engine.
+    pointer = JSONptr;
+    try {
+      res = pointer.stringify( o, r, s );
+    } catch( e ){
+      logerror( fname + e.message );
+    }
+    if (! res ) {
+      debugmsg( fname + 'input processing resulted in a null value.' );
+      return '';
+    }
+    return res;
+  }
+
+  /**
+ * Verify if an ECMA object has the selected location.
+ * Note: To reference properties with a dot in their name use the format ["property.name"] .
+ *
+ * Ported from IDM engine to RBPM. IDM Engine version at https://github.com/fchierad/IDM-ECMAlib/blob/v1.0.2/JSONlib-JS.js
+ *
+ * @function test
+ * @memberof PRD.util.JSONobj
+ * @since 1.0.3
+ *
+ * @param {(object|string)}  inputJSON    Input JSON (ECMA object). If a string-serialized JSON is provided it will be converted to a JSON object internally
+ * @param {string}           whattotest   Dot-separated list of properties as if you are accessing them via ECMAscript
+ *
+ * @return {boolean} true if the path is found, false otherwise
+ */
+function JSONtest( inputJSON, whattotest ) {
+  var fname, i, itval, itobj, obj, getArr, propName;
+  fname = 'JSONobj.test(): ';
+  // Review input data
+  if ( typeof inputJSON === 'string' ) {
+    obj = JSONparse( inputJSON );
+  } else {
+    obj = inputJSON;
+  }
+  if ( typeof whattotest === 'string' ) {
+    getArr = charArrToPropertyNames( stringToCharArray( whattotest ) );
+  } else {
+    debugmsg( fname + 'parameter whattotest should be a string value.' );
+    return false;
+  }
+  // Iterates through the object using itobj and itval as the middle steps to find the desired result
+  itobj = obj;
+  for ( i = 0; i < getArr.length; i++ ) {
+    propName = getArr[ i ];
+    debugmsg( fname + 'Parsing: "' + propName + '", type: ' + typeof propName );
+    if ( typeof itobj === 'object' && propName in itobj ) {
+      itval = itobj[ propName ];
+    } else {
+      debugmsg( fname + 'parsing ' + whattotest + ', could not find property "' + propName + '" in the current object location.' );
+      return false;
+    }
+    itobj = itval;
+  }
+  return true;
+}
+
+/**
+ * Retrieves a property of an ECMA object (or its subordinate object) and returns it in the specified type.
+ * Note: To reference properties with a dot in their name use the format ["property.name"] .
+ *
+ * Ported from IDM engine to RBPM. IDM Engine version at https://github.com/fchierad/IDM-ECMAlib/blob/v1.0.2/JSONlib-JS.js
+ *
+ * @function get
+ * @memberof PRD.util.JSONobj
+ * @since 1.0.3
+ *
+ * @param {(object|string)}  inputJSON     Input JSON (ECMA object). If a string-serialized JSON is provided it will be converted to a JSON object internally
+ * @param {string}           whattoget     Dot-separated list of properties as if you are accessing them via ECMAscript
+ * @param {string=}          [returntype]  (Optional) Desired return type. Valid values are: string, number, raw. Defaults to raw in case whatever is provided is not one of the 3 valid options
+ *
+ * @return {(string|number|boolean|object)} Selected property's value in the selected format. If parsing of the object fails returns an empty string
+ */
+function JSONget( inputJSON, whattoget, returntype ) {
+  var fname, i, itval, itobj, obj, getArr, propName, res = '';
+  fname = 'JSONobj.get(): ';
+  // Review input data
+  if ( typeof inputJSON === 'string' ) {
+    obj = JSONparse( inputJSON );
+  } else {
+    obj = inputJSON;
+  }
+  if ( typeof whattoget === 'string' ) {
+    getArr = charArrToPropertyNames( stringToCharArray( whattoget ) );
+  } else {
+    debugmsg( fname + 'parameter whattotest should be a string value.' );
+    return res;
+  }
+  if ( returntype !== 'string' && returntype !== 'number' && returntype !== 'raw' ) {
+      returntype = 'raw';
+  }
+  // Iterates through the object using itobj and itval as the middle steps to find the desired result
+  itobj = obj;
+  for ( i = 0; i < getArr.length; i++ ) {
+    propName = getArr[ i ];
+    debugmsg( fname + 'Parsing: "' + propName + '", type: ' + typeof propName );
+    if ( typeof itobj === 'object' && propName in itobj ) {
+      itval = itobj[ propName ];
+    } else {
+      logerror( fname + 'parsing ' + whattoget + ', could not find property "' + propName + '" in the current object location.' );
+      return res;
+    }
+    itobj = itval;
+  }
+  // Inspect returned data and coerce it as needed. No default set since res is set at the start of the function
+  switch ( returntype ) {
+    case 'string':
+      res = String( itval );
+      break;
+    case 'number':
+      res = parseInt( String( itval ), 10 );
+      break;
+    case 'raw':
+      res = itval;
+      break;
+  }
+  return res;
+}
+
+//  https://github.com/fchierad/IDM-ECMAlib/blob/v1.0.2/JSONlib-JS.md#JSONget
+
+  /**
+   * Unicode-safe split of a string to a character Array.
+   *
+   * Since IDM 4.5/IDM 4.6 does not have access to ES6 - therefore no spread ... operator - this function is needed.
+   * Once IDM supports the spread operator use that instead.
+   *
+   * Ported from IDM engine to RBPM. IDM Engine version at https://github.com/fchierad/IDM-ECMAlib/blob/v1.0.2/JSONlib-JS.js
+   *
+   * @since 1.0.3
+   * @private
+   * @param {string}  str   String input. Any other input will be coerced to string using String() and probably won't behave as expected
+   * @type {string[]}
+   * @return {string[]} Unicode-safe character array
+   */
+  function stringToCharArray( str ) {
+    var cArr = [], fname;
+    fname = 'stringToCharArray(): ';
+    try {
+      cArr = String( str ).split( /(?=(?:[\0-\t\x0B\f\x0E-\u2027\u202A-\uD7FF\uE000-\uFFFF]|[\uD800-\uDBFF][\uDC00-\uDFFF]|[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?:[^\uD800-\uDBFF]|^)[\uDC00-\uDFFF]))/ );
+    } catch( e ) {
+      logerror( fname + 'Failed to split the input string, error: ' + e.message );
+    }
+    return cArr;
+  }
+
+  /**
+   * JSON path parser. Iterates through a character array and returns an array with property names.
+   * Array indexes are purely numeric property names and will be returned as numbers, not strings.
+   * Character Array should have been split from the original ECMA object path that we want to parse.
+   *
+   * Ported from IDM engine to RBPM. IDM Engine version at https://github.com/fchierad/IDM-ECMAlib/blob/v1.0.2/JSONlib-JS.js
+   *
+   * @since 1.0.0
+   * @private
+   * @param {string[]}  str   Character string. Assumes each entry in the array is a single Unicode character
+   * @type {Array<(string|number)>}
+   * @return {Array<(string|number)>} property names array
+   */
+  function charArrToPropertyNames( cArr ) {
+    var i, fname, currentName, squaremark, re_whitespace, re_number, re_quotes, property = [];
+    fname = 'charArrToPropertyNames(): ';
+    if ( !( cArr instanceof Array ) ) {
+      logerror( fname + 'Input parameter is not an Array, aborting.' );
+      return property;
+    }
+    // Setup for parsing. Delimiter for property names are either dot or open and close square brackets
+    // If the contents inside square brackets are purely numeric then a number is returned
+    currentName = '';
+    re_number = /^\d+$/;
+    re_quotes = /^(['"])(.+)\1$/;
+    squaremark = ( cArr[ 0 ] === '[' )? 'first':'end'; //squaremark can be 'first', 'start', 'end'
+    // Iterates through the character array parsing elements into their own property array entry
+    for ( i=0; i < cArr.length; i++ ) {
+      if ( squaremark === 'first' && cArr[ i ] === '[' ) {
+        squaremark = 'start';
+        continue;
+      }
+      if ( squaremark === 'end' && cArr[ i ] === '[' ) {
+        squaremark = 'start';
+        if ( currentName.trim() !== '' ) { // prevent double push on constructs like arr[0][0]
+          property.push( currentName.trim() );
+        }
+        currentName = '';
+        continue;
+      }
+      if ( squaremark === 'start' && cArr[ i ] === ']' ) {
+        squaremark = 'end';
+        currentName = currentName.trim();
+        // If the property name between [] is a pure number, coerces the string to a number
+        if ( re_number.test( currentName ) ) {
+          currentName = parseInt( currentName, 10 );
+        }
+        // Remove quotes around property name if they are present like obj["property name"], returning property name
+        if ( re_quotes.test( currentName ) ) {
+          currentName = re_quotes.exec( currentName )[2];
+        }
+        property.push( currentName );
+        currentName = '';
+        continue;
+      }
+      // Traditional . delimiter
+      if ( squaremark === 'end' && cArr[ i ] === '.' ) {
+        if ( currentName.trim() !== '' ) { // prevent double push on constructs like arr[0].name
+          property.push( currentName.trim() );
+        }
+        currentName = '';
+        continue;
+      }
+      currentName += cArr[ i ];
+    }
+    if ( currentName !== '' ) {
+      property.push( currentName.trim() );
+    }
+    return property;
   }
 
   /**
@@ -568,7 +593,7 @@ function JSONget( inputJSON, whattoget, returntype ) {
       // Deduplicate lists, then compare them
       if ( list1 instanceof Array && list2 instanceof Array ) {
         // generate hashmap for list1
-        for( i = 0; i < list1.length; i++ ) {
+        for ( i = 0; i < list1.length; i++ ) {
           // Using compare for case sensitive and insentive comparisson while keeping curr as the current value coerced to string
           curr = String( list1[ i ] );
           if ( ignorecase === true ) {
@@ -582,7 +607,7 @@ function JSONget( inputJSON, whattoget, returntype ) {
           }
         }
         // Build onlyin2 and isinboth by iterating on list2, generating its hashmap while comparing with list1
-        for( i = 0; i < list2.length; i++ ) {
+        for ( i = 0; i < list2.length; i++ ) {
           // Using compare for case sensitive and insentive comparisson while keeping curr as the current value coerced to string
           curr = String( list2[ i ] );
           if ( ignorecase === true ) {
@@ -600,7 +625,7 @@ function JSONget( inputJSON, whattoget, returntype ) {
           }
         }
         // Iterate deduplicated list1 against list2's hashmap to populate onlyin2
-        for( i = 0; i < dedup1.length; i++ ){
+        for ( i = 0; i < dedup1.length; i++ ){
           // Using compare for case sensitive and insentive comparisson while keeping curr as the current value coerced to string
           curr = String( dedup1[ i ] );
           if ( ignorecase === true ) {
@@ -646,7 +671,7 @@ function JSONget( inputJSON, whattoget, returntype ) {
       }
       // Deduplicate array, generate
       if ( obj instanceof Array ) {
-        for( i = 0; i < obj.length; i++ ) {
+        for ( i = 0; i < obj.length; i++ ) {
           // Using compare for case sensitive and insentive comparisson while keeping curr as the current value coerced to string
           curr = String( obj[ i ] );
           if ( ignorecase === true ) {
@@ -680,46 +705,57 @@ function JSONget( inputJSON, whattoget, returntype ) {
    * @type {(array.<(object|string)>|null)}
    * @return {(array.<(object|string)>|null)} ECMA Array of objects and string. If error occur returns null.
    */
-  function getObject2arr( list ) {
-    var res = null, fname, initialnode, currnode, nodename, childnodes;
+  function getObject2arr( list, onelvl ) {
+    var res, fname, initialnode, currnode, nodename, childnodes, preprocess, removeobj;
     fname = 'getObject2arr(): ';
+    res = null; removeobj = true;
+
     if ( list === null || (!( typeof list === 'object' && list.getClass() == 'class java.util.ArrayList' )) ) {
       logerror( fname + 'Invalid parameter received. list must be the result of a flowdata.getObject() call.' );
       return res;
     }
+    // Retrieves the first ElementNSImpl node from the list
     if ( list.size() > 0 ) {
-      // Retrieves the first ElementNSImpl node from the list
       initialnode = list.get(0);
     }
+
+    // Iterate through the nodes, group element child nodes into arrays as per their content.
     if ( initialnode != null && typeof initialnode === 'object' && initialnode.getClass() == 'class org.apache.xerces.dom.ElementNSImpl' ) {
       currnode = initialnode;
       res = [ {} ];
+      preprocess = {};
       while ( currnode ) {
-        if ( currnode.getNodeType() == getNodeTypes.nodetype.Element ) {
-          nodename = String( currnode.getNodeName() );
-          if ( ! res[ 0 ].hasOwnProperty( nodename ) ) {
-            res[ 0 ][ nodename ] = [];
-          }
-
-          if ( currnode.hasChildNodes() ) {
-            childnodes = currnode.getChildNodes();
-            for ( i = 0; i < childnodes.getLength(); i++ ) {
-              if ( shouldProcessNode( childnodes.item( i ) ) ) {
-                res[ 0 ][ nodename ].push( flowdata2obj( childnodes.item( i ) ) );
-              }
-            }
-          }
-
-        }
+        // Text nodes are appended as is to the current level
         if ( currnode.getNodeType() == getNodeTypes.nodetype.Text ) {
           if ( shouldProcessNode( currnode ) ) {
-            logerror( fname + 'found text node: "' + currnode.getNodeValue().charCodeAt(0) + '"' + currnode.getNodeValue().length );
+            debugmsg( fname + 'found text node. getNodeValue(): "' + currnode.getNodeValue() + '"' );
             res.push( String( currnode.getNodeValue() ) );
           }
         }
+        // Element nodes require grouping for deduplication since we can have 2 sibling elements with the same node name
+        if ( currnode.getNodeType() == getNodeTypes.nodetype.Element ) {
+          // Deduplication of node names
+          nodename = String( currnode.getNodeName() );
+          debugmsg( fname + 'found element node "' + nodename + '"' );
+          if ( ! preprocess.hasOwnProperty( nodename ) ) {
+            preprocess[ nodename ] = [];
+          }
+          preprocess[ nodename ].push( currnode );
+          removeobj = false;
+        }
         currnode = currnode.getNextSibling();
       }
+
+      // Iterates the properties and set them up using flowdata2obj
+      for ( nodename in preprocess ) {
+        res[ 0 ][ nodename ] = flowdata2obj( preprocess[ nodename ] );
+      }
+
+      if ( removeobj ) {
+        res = res.splice( 1 );
+      }
     }
+
     return res;
   }
 
@@ -755,37 +791,64 @@ function JSONget( inputJSON, whattoget, returntype ) {
    * (Engine only) Iterates recursively through DOM nodes from flowdata
    * @since 1.0.2
    * @private
-   * @param  {(org.apache.xerces.dom.ElementNSImpl|org.apache.xerces.dom.TextImpl)}  node     Java xerces node
-   * @type {(string|object)}
-   * @return {(string|object)} String or ECMA objects.
+   * @param  {org.apache.xerces.dom.ElementNSImpl[]}  node     Java xerces node or ECMA array of nodes
+   * @type {array.<(object|string)>}
+   * @return {array.<(object|string)>} ECMA Array of objects and strings.
    */
   function flowdata2obj( node ) {
-    var fname, i, nodename, childnodes, iterate = {};
+    var fname, res, i, j, nodename, childnodes, childnode, iterate, removeobj;
     fname = 'flowdata2obj(): ';
-    if ( node === null) {
-      return '';
-    }
-    if ( node.getNodeType() == getNodeTypes.nodetype.Text ) {
-      return String( node.getNodeValue() );
-    }
-    if ( node.getNodeType() == getNodeTypes.nodetype.Element ) {
-      nodename = String( node.getNodeName() );
-      // Child node processing
-      if ( node.hasChildNodes() ) {
-        iterate[ nodename ] = [];
-        childnodes = node.getChildNodes();
-        for ( i = 0; i < childnodes.getLength(); i++ ) {
-          if ( shouldProcessNode( childnodes.item( i ) ) ) {
-            iterate[ nodename ].push( flowdata2obj( childnodes.item( i ) ) );
-          }
+    res = [ '' ]; iterate = {}; removeobj = true;
+    // Array of nodes,  process their child nodes only and return array with 1 object and 1 or more text nodes
+    // Iterate through the array of parent nodes that should have the same element name
+    if ( node instanceof Array ) {
+      debugmsg( fname + 'Received array for processing, length: ' + node.length );
+      res = [ {} ];
+      // Iterate through the parent nodes to collate child nodes with same element name
+      for ( i = 0; i < node.length; i++ ) {
+        if ( node[ i ].hasChildNodes() ) {
+          debugmsg( fname + 'node at position ' + i + ' has child nodes' );
+          childnodes = node[ i ].getChildNodes();
+          // Iterates through child nodes of a single parent node
+          for ( j = 0; j < childnodes.getLength(); j++ ) {
+            debugmsg( fname + 'array index ' + i + ': processing child node ' + j );
+            childnode = childnodes.item( j );
+            // Text nodes are appended as is to the current level
+            if ( childnode.getNodeType() == getNodeTypes.nodetype.Text ) {
+              if ( shouldProcessNode( childnode ) ) {
+                debugmsg( fname + 'Found text node. getNodeValue(): "' + childnode.getNodeValue() + '"' );
+                res.push( String( childnode.getNodeValue() ) );
+              }
+            }
+            // Element nodes require grouping for deduplication since we can have 2 sibling elements with the same node name
+            if ( childnode.getNodeType() == getNodeTypes.nodetype.Element ) {
+              // Deduplication of node names
+              nodename = String( childnode.getNodeName() );
+              debugmsg( fname + 'found element node "' + nodename + '"' );
+              if ( ! iterate.hasOwnProperty( nodename ) ) {
+                iterate[ nodename ] = [];
+              }
+              iterate[ nodename ].push( childnode );
+              removeobj = false;
+            }
+          } // Finished processing a single parent node's child nodes
         }
-      } else {
-        // In flowdata any element node with no child nodes has received an empty string
-        iterate[ nodename ] = [ '' ];
+      } // Finished processing all parent nodes
+
+      /* At this point we've grouped all the childnodes that contain the same names
+        across all parent nodes that contained the same name.
+        We can now parse those resuls recursively */
+
+      // Iterates the properties and set them up recursive calling flowdata2obj again
+      for ( nodename in iterate ) {
+        res[ 0 ][ nodename ] = flowdata2obj( iterate[ nodename ] );
       }
-      return iterate;
+
+      if ( removeobj ) {
+        res = res.splice( 1 );
+      }
     }
-    return '';
+    return res;
   }
 
   /**
@@ -978,7 +1041,7 @@ function JSONget( inputJSON, whattoget, returntype ) {
       if ( parameters === null ) {
         pconv = String( parameters );
       } else {
-        pconv = JSONobj.stringify( parameters );
+        pconv = JSONstringify( parameters );
       }
       errmsg.push( 'parameters: ' + pconv + ',' );
       errmsg.push( 'IDVobj: ' + String( IDVobj ) + '.' );

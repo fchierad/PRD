@@ -1,7 +1,7 @@
 <a name="PRD"></a>
 
 ## PRD : <code>object</code>
-Simple module to assist on workflow developmentCreated to be imported in Overview > Global Scripts and used on both forms and engine.
+Simple module to assist on workflow development.Created to be imported in Overview > Global Scripts and used on both forms and engine.
 
 **Kind**: global namespace  
 **Version**: 1.0.3  
@@ -10,9 +10,10 @@ Simple module to assist on workflow developmentCreated to be imported in Overvi
 * [PRD](#PRD) : <code>object</code>
     * [.util](#PRD.util) : <code>object</code>
         * [.JSONobj](#PRD.util.JSONobj) : <code>object</code>
-            * [.parse(s, [reviver])](#PRD.util.JSONobj.parse) ⇒ <code>object</code>
-            * [.stringify(o, [replacer], [space])](#PRD.util.JSONobj.stringify) ⇒ <code>string</code>
+            * [.parse(s, [reviver])](#PRD.util.JSONobj.parse) ⇒ <code>object</code> \| <code>object</code>
+            * [.stringify(o, [replacer], [space])](#PRD.util.JSONobj.stringify) ⇒ <code>string</code> \| <code>string</code>
             * [.test(inputJSON, whattotest)](#PRD.util.JSONobj.test) ⇒ <code>boolean</code>
+            * [.get(inputJSON, whattoget, [returntype])](#PRD.util.JSONobj.get) ⇒ <code>string</code> \| <code>number</code> \| <code>boolean</code> \| <code>object</code>
         * [.formOrEngine()](#PRD.util.formOrEngine) ⇒ <code>string</code>
         * [.logerror(msg)](#PRD.util.logerror) ⇒ <code>boolean</code>
         * [.coerceToString(input, [defVal])](#PRD.util.coerceToString) ⇒ <code>string</code>
@@ -38,9 +39,10 @@ Simple module to assist on workflow developmentCreated to be imported in Overvi
 
 * [.util](#PRD.util) : <code>object</code>
     * [.JSONobj](#PRD.util.JSONobj) : <code>object</code>
-        * [.parse(s, [reviver])](#PRD.util.JSONobj.parse) ⇒ <code>object</code>
-        * [.stringify(o, [replacer], [space])](#PRD.util.JSONobj.stringify) ⇒ <code>string</code>
+        * [.parse(s, [reviver])](#PRD.util.JSONobj.parse) ⇒ <code>object</code> \| <code>object</code>
+        * [.stringify(o, [replacer], [space])](#PRD.util.JSONobj.stringify) ⇒ <code>string</code> \| <code>string</code>
         * [.test(inputJSON, whattotest)](#PRD.util.JSONobj.test) ⇒ <code>boolean</code>
+        * [.get(inputJSON, whattoget, [returntype])](#PRD.util.JSONobj.get) ⇒ <code>string</code> \| <code>number</code> \| <code>boolean</code> \| <code>object</code>
     * [.formOrEngine()](#PRD.util.formOrEngine) ⇒ <code>string</code>
     * [.logerror(msg)](#PRD.util.logerror) ⇒ <code>boolean</code>
     * [.coerceToString(input, [defVal])](#PRD.util.coerceToString) ⇒ <code>string</code>
@@ -63,17 +65,17 @@ Proxy for the actual JSON object used in browsers (JSON) or workflow engine (Scr
 **Since**: 1.0.2  
 
 * [.JSONobj](#PRD.util.JSONobj) : <code>object</code>
-    * [.parse(s, [reviver])](#PRD.util.JSONobj.parse) ⇒ <code>object</code>
-    * [.stringify(o, [replacer], [space])](#PRD.util.JSONobj.stringify) ⇒ <code>string</code>
+    * [.parse(s, [reviver])](#PRD.util.JSONobj.parse) ⇒ <code>object</code> \| <code>object</code>
+    * [.stringify(o, [replacer], [space])](#PRD.util.JSONobj.stringify) ⇒ <code>string</code> \| <code>string</code>
     * [.test(inputJSON, whattotest)](#PRD.util.JSONobj.test) ⇒ <code>boolean</code>
+    * [.get(inputJSON, whattoget, [returntype])](#PRD.util.JSONobj.get) ⇒ <code>string</code> \| <code>number</code> \| <code>boolean</code> \| <code>object</code>
 
 <a name="PRD.util.JSONobj.parse"></a>
 
-##### JSONobj.parse(s, [reviver]) ⇒ <code>object</code>
-Wrapper for the parse() call on the host environment's JSON objectSee https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/parse
+##### JSONobj.parse(s, [reviver]) ⇒ <code>object</code> \| <code>object</code>
+Wrapper for the parse() call on the host environment's JSON object.See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/parse
 
 **Kind**: static method of [<code>JSONobj</code>](#PRD.util.JSONobj)  
-**Returns**: <code>object</code> - ECMA Object generated from the JSON string. On error return empty object and report the error via logerror()  
 **Since**: 1.0.2  
 
 | Param | Type | Description |
@@ -83,11 +85,10 @@ Wrapper for the parse() call on the host environment's JSON objectSee https://d
 
 <a name="PRD.util.JSONobj.stringify"></a>
 
-##### JSONobj.stringify(o, [replacer], [space]) ⇒ <code>string</code>
-Wrapper for the stringify() call on the host environment's JSON objectSee https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify
+##### JSONobj.stringify(o, [replacer], [space]) ⇒ <code>string</code> \| <code>string</code>
+Wrapper for the stringify() call on the host environment's JSON object.See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify
 
 **Kind**: static method of [<code>JSONobj</code>](#PRD.util.JSONobj)  
-**Returns**: <code>string</code> - Serialized ECMA object in JSON format. On error return empty string and report the error via logerror()  
 **Since**: 1.0.2  
 
 | Param | Type | Description |
@@ -99,7 +100,7 @@ Wrapper for the stringify() call on the host environment's JSON objectSee https
 <a name="PRD.util.JSONobj.test"></a>
 
 ##### JSONobj.test(inputJSON, whattotest) ⇒ <code>boolean</code>
-Verify if an ECMA object has the selected location.Note: To reference properties with a dot in their name use the format ["property.name"]Ported from IDM engine to RBPM. IDM Engine version at https://github.com/fchierad/IDM-ECMAlib/blob/v1.0.2/JSONlib-JS.js
+Verify if an ECMA object has the selected location.Note: To reference properties with a dot in their name use the format ["property.name"] .Ported from IDM engine to RBPM. IDM Engine version at https://github.com/fchierad/IDM-ECMAlib/blob/v1.0.2/JSONlib-JS.js
 
 **Kind**: static method of [<code>JSONobj</code>](#PRD.util.JSONobj)  
 **Returns**: <code>boolean</code> - true if the path is found, false otherwise  
@@ -109,6 +110,21 @@ Verify if an ECMA object has the selected location.Note: To reference propertie
 | --- | --- | --- |
 | inputJSON | <code>object</code> \| <code>string</code> | Input JSON (ECMA object). If a string-serialized JSON is provided it will be converted to a JSON object internally |
 | whattotest | <code>string</code> | Dot-separated list of properties as if you are accessing them via ECMAscript |
+
+<a name="PRD.util.JSONobj.get"></a>
+
+##### JSONobj.get(inputJSON, whattoget, [returntype]) ⇒ <code>string</code> \| <code>number</code> \| <code>boolean</code> \| <code>object</code>
+Retrieves a property of an ECMA object (or its subordinate object) and returns it in the specified type.Note: To reference properties with a dot in their name use the format ["property.name"] .Ported from IDM engine to RBPM. IDM Engine version at https://github.com/fchierad/IDM-ECMAlib/blob/v1.0.2/JSONlib-JS.js
+
+**Kind**: static method of [<code>JSONobj</code>](#PRD.util.JSONobj)  
+**Returns**: <code>string</code> \| <code>number</code> \| <code>boolean</code> \| <code>object</code> - Selected property's value in the selected format. If parsing of the object fails returns an empty string  
+**Since**: 1.0.3  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| inputJSON | <code>object</code> \| <code>string</code> | Input JSON (ECMA object). If a string-serialized JSON is provided it will be converted to a JSON object internally |
+| whattoget | <code>string</code> | Dot-separated list of properties as if you are accessing them via ECMAscript |
+| [returntype] | <code>string</code> | (Optional) Desired return type. Valid values are: string, number, raw. Defaults to raw in case whatever is provided is not one of the 3 valid options |
 
 <a name="PRD.util.formOrEngine"></a>
 
@@ -273,7 +289,7 @@ Coerces the result to an ECMA string.Coercion rules for this function:If the f
 <a name="PRD.version"></a>
 
 ### PRD.version() ⇒ <code>string</code>
-Return module version
+Return module version.
 
 **Kind**: static method of [<code>PRD</code>](#PRD)  
 **Returns**: <code>string</code> - Module's version in the format M.m.p (Major, minor, patch)  
