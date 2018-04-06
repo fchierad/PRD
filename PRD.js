@@ -2,7 +2,7 @@
  * Simple module to assist on workflow development.
  * Created to be imported in Overview > Global Scripts and used on both forms and engine.
  * @namespace PRD
- * @version 1.0.3
+ * @version 1.0.4wip
  * @license MIT License
  */
 var PRD = (function IIFE( logprefix, verbosemsg ) {
@@ -35,7 +35,7 @@ var PRD = (function IIFE( logprefix, verbosemsg ) {
    * @return {string} Module's version in the format M.m.p (Major, minor, patch)
    */
   function version() {
-    return '1.0.3';
+    return 'work in progress';
   }
 
   /**
@@ -487,6 +487,7 @@ function JSONget( inputJSON, whattoget, returntype ) {
    * If the first input parameter is a String, Number or Boolean it returns a string.
    * If the first input parameter is an object other than an Array it returns the default value.
    * If the second input value is not null then the default value becomes the second input value.
+   * If the coercion to string from String, Number, Boolean or Array resulted in empty string, return default value.
    *
    * @memberof PRD.util
    * @since 1.0.0
@@ -498,7 +499,7 @@ function JSONget( inputJSON, whattoget, returntype ) {
    * @return {string} resulting string.
    */
   function coerceToString( input, defVal ) {
-    var ret = '';
+    var ret = '', str;
     /* Throughout this function String() is used to guarantee that the string generated
      * is an ECMA string. This is only a concern on the workflow engine since the engine
      * allows a mix of ECMA and Java code. Returning a Java string will cause the
@@ -511,10 +512,13 @@ function JSONget( inputJSON, whattoget, returntype ) {
       return ret;
     }
     if ( typeof input === 'string' || typeof input === 'number' || typeof input === 'boolean' ) {
-      ret = String( input );
+      str = String( input );
     }
     if ( input instanceof Array ) {
-      ret = String( input.join( ' ' ) );
+      str = String( input.join( ' ' ) );
+    }
+    if ( str !== '' ) {
+      ret = str;
     }
     return ret;
   }
