@@ -372,7 +372,7 @@ function JSONget( inputJSON, whattoget, returntype ) {
       res = String( itval );
       break;
     case 'number':
-      res = parseInt( String( itval ), 10 );
+      res = Number( itval );
       break;
     case 'raw':
       res = itval;
@@ -453,7 +453,7 @@ function JSONget( inputJSON, whattoget, returntype ) {
         currentName = currentName.trim();
         // If the property name between [] is a pure number, coerces the string to a number
         if ( re_number.test( currentName ) ) {
-          currentName = parseInt( currentName, 10 );
+          currentName = Number( currentName );
         }
         // Remove quotes around property name if they are present like obj["property name"], returning property name
         if ( re_quotes.test( currentName ) ) {

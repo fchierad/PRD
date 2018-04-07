@@ -4,7 +4,7 @@
 Simple module to assist on workflow development.Created to be imported in Overview > Global Scripts and used on both forms and engine.
 
 **Kind**: global namespace  
-**Version**: 1.0.3  
+**Version**: 1.0.4wip  
 **License**: MIT License  
 
 * [PRD](#PRD) : <code>object</code>
@@ -150,7 +150,7 @@ Output error message based on where the code is running.Output to the console.l
 <a name="PRD.util.coerceToString"></a>
 
 #### util.coerceToString(input, [defVal]) ⇒ <code>string</code>
-Coerces the result to an ECMA string.Coercion rules for this function:If the first input parameter is null or undefined returns default value.If the first input parameter is an Array it returns the array joined by ' '.If the first input parameter is a String, Number or Boolean it returns a string.If the first input parameter is an object other than an Array it returns the default value.If the second input value is not null then the default value becomes the second input value.
+Coerces the result to an ECMA string.Coercion rules for this function:If the first input parameter is null or undefined returns default value.If the first input parameter is an Array it returns the array joined by ' '.If the first input parameter is a String, Number or Boolean it returns a string.If the first input parameter is an object other than an Array it returns the default value.If the second input value is not null then the default value becomes the second input value.If the coercion to string from String, Number, Boolean or Array resulted in empty string, return default value.
 
 **Kind**: static method of [<code>util</code>](#PRD.util)  
 **Returns**: <code>string</code> - resulting string.  
