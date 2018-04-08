@@ -186,6 +186,8 @@ var PRD = (function IIFE( logprefix, verbosemsg ) {
 
    /**
    * (Form only) Initializes references to the IDMAPPs framework objects and save the same in the internal storage.
+   * Uses IDVault internally on IDVget(), IDVglobalQuery(), GCVget(), getNamedPassword().
+   * Exports field as PRD.web.field and form as PRD.web.form for usage inside global scripts.
    * Returns nothing.
    *
    * @function init
@@ -201,9 +203,15 @@ var PRD = (function IIFE( logprefix, verbosemsg ) {
     // before using it in the functions that require the User App/RBPM/IDMAPPS framework
     if ( field != null ) {
       IDMAPPS.field = field;
+      if ( 'web' in PublicAPI ) {
+        PublicAPI.web.field = field;
+      }
     }
     if ( form != null ) {
       IDMAPPS.form = form;
+      if ( 'web' in PublicAPI ) {
+        PublicAPI.web.form = form;
+      }
     }
     if ( IDVault != null ) {
       IDMAPPS.IDVault = IDVault;
@@ -1187,6 +1195,7 @@ function JSONget( inputJSON, whattoget, returntype ) {
   // Form-only API extensions:
   if ( where === 'form' ) {
     PublicAPI.init = formInit;
+    PublicAPI.web = {};
   }
 
   return PublicAPI;
