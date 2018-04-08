@@ -219,6 +219,38 @@ var PRD = (function IIFE( logprefix, verbosemsg ) {
   }
 
   /**
+   * When added in the event section of a form field, allow us to show and hide that field by using
+   * field.fireEvent( event-name, action );
+   * Where event-name is the event's name and action is either 'show' or 'hide'
+   *
+   * Since the field visibility functions only exist inside the field context we need to pass both objects from where
+   * the function is being called to use them inside that scope/context. Inside the event we just need to add the line:
+   * IAtools.fieldVisibility( event, field );
+   * to properly use this function. No need to change anything on the line above, it is already passing the event and field objects
+   * as seen in the scope of that particular form field.
+   *
+   * no return value provided.
+   *
+   * @memberof PRD.web
+   *
+   * @param {object}  event  event object as seen by the field's scope
+   * @param {object}  field  field  object as seen by the field's scope
+   */
+  function fieldVisibility( event, field ) {
+    var action = String( event.getCustomData() );
+    switch ( action.toLowerCase() ) {
+      case 'show':
+        field.show();
+        break;
+      case 'hide':
+        field.hide();
+        break;
+      default:
+      logerror( 'Field: ' + field.getLabel() + ', Event: ' + event.getEventName() + ', Invalid option received: ' + action );
+    }
+  }
+
+  /**
    * Wrapper for the parse() call on the host environment's JSON object.
    * See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/parse
    *
