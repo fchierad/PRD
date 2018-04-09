@@ -39,8 +39,10 @@ var PRD = (function IIFE( logprefix, verbosemsg ) {
   }
 
   /**
+   * Utility functions for use in  Identity Manager work flow development.
    * @namespace PRD.util
    * @memberof PRD
+   * @since 1.0.0
    */
 
     /**
@@ -50,6 +52,13 @@ var PRD = (function IIFE( logprefix, verbosemsg ) {
    * @namespace PRD.util.JSONobj
    * @memberof PRD.util
    * @since 1.0.2
+   */
+
+  /**
+   * Functions and objects that can only be accessed in work flow forms.
+   * @namespace PRD.web
+   * @memberof PRD
+   * @since 1.0.4
    */
 
   /**
@@ -186,7 +195,7 @@ var PRD = (function IIFE( logprefix, verbosemsg ) {
 
   /**
    * Returns the type of an ECMA object or class of a Java object.
-   * For ECMA relies on typeof and instanceof, if neither works uses .constructor.name.
+   * For ECMA relies on typeof and instanceof, if neither works uses Object.prototype.toString .
    * For Java objects just calls getClass().
    * Prints result via logerror, returns result as string.
    *
@@ -283,7 +292,7 @@ var PRD = (function IIFE( logprefix, verbosemsg ) {
   }
 
   /**
-   * When added in the event section of a form field, allow us to show and hide that field by using
+   * (Form only) When added in the event section of a form field, allow us to show and hide that field by using
    * field.fireEvent( event-name, action );
    * Where event-name is the event's name and action is either 'show' or 'hide'
    *
@@ -296,6 +305,7 @@ var PRD = (function IIFE( logprefix, verbosemsg ) {
    * no return value provided.
    *
    * @memberof PRD.web
+   * @since 1.0.4
    *
    * @param {object}  event  event object as seen by the field's scope
    * @param {object}  field  field  object as seen by the field's scope
@@ -1291,7 +1301,9 @@ function JSONget( inputJSON, whattoget, returntype ) {
   // Form-only API extensions:
   if ( where === 'form' ) {
     PublicAPI.init = formInit;
-    PublicAPI.web = {};
+    PublicAPI.web = {
+      fieldVisibility:fieldVisibility
+    };
   }
 
   return PublicAPI;

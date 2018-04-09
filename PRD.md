@@ -26,6 +26,8 @@ Simple module to assist on workflow development.Created to be imported in Overv
         * [.ECMAArrayToJavaVector(arr)](#PRD.util.ECMAArrayToJavaVector) ⇒ <code>java.util.Vector</code>
         * [.GCVget(GCVname, returnType, DefaultValue)](#PRD.util.GCVget) ⇒ <code>string</code> \| <code>number</code> \| <code>boolean</code>
         * [.getNamedPassword(NamedPassword, try5times)](#PRD.util.getNamedPassword) ⇒ <code>string</code> \| <code>null</code>
+    * [.web](#PRD.web) : <code>object</code>
+        * [.fieldVisibility(event, field)](#PRD.web.fieldVisibility)
     * [.version()](#PRD.version) ⇒ <code>string</code>
     * [.setlogprefix(str)](#PRD.setlogprefix)
     * [.init(field, form, IDVault)](#PRD.init)
@@ -35,7 +37,10 @@ Simple module to assist on workflow development.Created to be imported in Overv
 <a name="PRD.util"></a>
 
 ### PRD.util : <code>object</code>
+Utility functions for use in  Identity Manager work flow development.
+
 **Kind**: static namespace of [<code>PRD</code>](#PRD)  
+**Since**: 1.0.0  
 
 * [.util](#PRD.util) : <code>object</code>
     * [.JSONobj](#PRD.util.JSONobj) : <code>object</code>
@@ -285,6 +290,26 @@ Coerces the result to an ECMA string.Coercion rules for this function:If the f
 | --- | --- | --- |
 | NamedPassword | <code>string</code> | Name of the GCV-ref to the Named Password to be retrieved. |
 | try5times | <code>any</code> | If not provided or null a single read is attempted.                                 If provides and read fails try 4 more times, with 1 second pause between them. |
+
+<a name="PRD.web"></a>
+
+### PRD.web : <code>object</code>
+Functions and objects that can only be accessed in work flow forms.
+
+**Kind**: static namespace of [<code>PRD</code>](#PRD)  
+**Since**: 1.0.4  
+<a name="PRD.web.fieldVisibility"></a>
+
+#### web.fieldVisibility(event, field)
+(Form only) When added in the event section of a form field, allow us to show and hide that field by usingfield.fireEvent( event-name, action );Where event-name is the event's name and action is either 'show' or 'hide'Since the field visibility functions only exist inside the field context we need to pass both objects from wherethe function is being called to use them inside that scope/context. Inside the event we just need to add the line:IAtools.fieldVisibility( event, field );to properly use this function. No need to change anything on the line above, it is already passing the event and field objectsas seen in the scope of that particular form field.no return value provided.
+
+**Kind**: static method of [<code>web</code>](#PRD.web)  
+**Since**: 1.0.4  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| event | <code>object</code> | event object as seen by the field's scope |
+| field | <code>object</code> | field  object as seen by the field's scope |
 
 <a name="PRD.version"></a>
 
