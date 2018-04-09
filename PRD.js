@@ -184,8 +184,72 @@ var PRD = (function IIFE( logprefix, verbosemsg ) {
     }
   }
 
+  /**
+   * Returns the type of an ECMA object or class of a Java object.
+   * For ECMA relies on typeof and instanceof, if neither works uses .constructor.name.
+   * For Java objects just calls getClass().
+   * Prints result via logerror, returns result as string.
+   *
+   * @since 1.0.4
+   * @private
+   * @param {string}  input   ECMA or Java input
+   * @type {string}
+   * @return {string} analysis result
+   */
+  function inspectType( input ) {
+    var res = '';
+    // See:
+    // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures
+    // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/typeof
+    // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/instanceof
+    // ECMA null
+    if ( input === null ) {
+      res = 'null';
+    }
+    // ECMA undefined
+    if ( typeof input === 'undefined' ) {
+      res = 'undefined';
+    }
+    // ECMA symbol (ES6 onwards)
+    if ( typeof input === 'symbol' ) {
+      res = 'symbol';
+    }
+    // ECMA string. typeof won't capture the case where a string was created via New String(), so need instanceof too
+    if ( typeof input === 'string' || ( typeof input === 'object' && input instanceof String ) ) {
+      res = 'string';
+    }
+    // ECMA number. typeof won't capture the case where a number was created via New Number(), so need instanceof too
+    if ( typeof input === 'number' || ( typeof input === 'object' && input instanceof Number ) ) {
+      res = 'boolean';
+    }
+    // ECMA boolean. typeof won't capture the case where a string was created via New Boolean(), so need instanceof too
+    if ( typeof input === 'boolean' || ( typeof input === 'object' && input instanceof Boolean ) ) {
+      res = 'boolean';
+    }
+    // ECMA functionn. Some posts report typeof not returning 'function' on certain environments so checking via instanceof as a fallback
+    if ( typeof input === 'function' || ( typeof input === 'object' && input instanceof Function ) ) {
+      res = 'function';
+    }
+    if ( res === '' && typeof input === 'object' ) {
+      if ( input instanceof Array ) { // ECMA Array
+        res = 'array';
+      } else if ( input instanceof RegExp ) { // ECMA regular expression
+        res = 'regexp';
+      } else if ( input instanceof  Date ) { // ECMA date object
+        res = 'date';
+      } else if ( input instanceof Error ) { // ECMA error object
+        res = 'error';
+      } else if ( 'getClass' in input ) { // Java class
+        res = input.getClass();
+      } else { // ECMA fallback to get the object's constructor name. adding .slice( 8, -1 ) would remove the [ object ] portion of the string.
+        res = Object.prototype.toString.call( input );
+      }
+    }
+    logerror( res );
+    return res;
+  }
    /**
-   * (Form only) Initializes references to the IDMAPPs framework objects and save the same in the internal storage.
+   * (Form only) Initializes references to the RBPM/IDMAPPS framework objects and save the same in the internal storage.
    * Uses IDVault internally on IDVget(), IDVglobalQuery(), GCVget(), getNamedPassword().
    * Exports field as PRD.web.field and form as PRD.web.form for usage inside global scripts.
    * Returns nothing.
@@ -622,7 +686,7 @@ function JSONget( inputJSON, whattoget, returntype ) {
    * @type {Array.<string[]>}
    * @return {Array.<string[]>} ECMA Array with 3 parts. [ [ elements only present on list1 ], [ elements only present on list2 ], [ elements present on both] ]
    */
-  function Compare( list1, list2 , ignorecase ) {
+  function Compare( list1, list2 ,ignorecase ) {
     var exists1 = {}, exists2 = {}, onlyin1 = [], onlyin2 = [], isinboth = [], res,
     i, curr, compare, fname, dedup1 = [];
     fname = 'Unique(): ';
