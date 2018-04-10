@@ -650,15 +650,19 @@ function JSONget( inputJSON, whattoget, returntype ) {
    * @return {string} HTTP Basic 'Authorization' header's value.
    */
   function basicHTTPauthHeader( username, password ) {
-    var res = 'Basic ', conc, JString, Base64, b64str;
+    var fname, res, conc, Base64, b64str;
+    fname = 'basicHTTPauthHeader(): ';
+    if ( username == null || password == null ) {
+      logerror( fname + 'username and password must be provided and not null nor undefined.' );
+      return '';
+    }
     try {
-      JString = java.lang.String;
       Base64 = new Packages.org.apache.commons.codec.binary.Base64();
-      conc = JString( String( username ) + ':' + String( password ) ).getBytes( 'UTF-8' );
-      b64str = String( JString( Base64.encodeBase64( conc ), 'UTF-8' ) );
-      res += b64str;
+      conc = JString( username + ':' + password ).getBytes( 'UTF-8' );
+      b64str = JString( Base64.encodeBase64( conc ), 'UTF-8' );
+      res = 'Basic ' + b64str;
     } catch( e ) {
-      logerror( 'basicAuthHeader(): Failed to build Basic Authentication HTTP header value. Error: ' + e.message );
+      logerror( fname + 'Failed to build Basic Authentication HTTP header value. Error: ' + e.message );
     }
     return res;
   }
