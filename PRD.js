@@ -261,34 +261,140 @@ var PRD = (function IIFE( logprefix, verbosemsg ) {
    * (Form only) Initializes references to the RBPM/IDMAPPS framework objects and save the same in the internal storage.
    * Uses IDVault internally on IDVget(), IDVglobalQuery(), GCVget(), getNamedPassword().
    * Exports field as PRD.web.field and form as PRD.web.form for usage inside global scripts.
+   * Refactored to accept 1 to 3 parameters with the framework objects in any order.
    * Returns nothing.
    *
    * @function init
    * @memberof PRD
    * @since 1.0.0
    *
-   * @param {object}  field    IDMAPPS framework field object
-   * @param {object}  form     IDMAPPS framework form object
-   * @param {object}  IDVault  IDMAPPS framework IDVault object
+   * @param {object}   obj1      One of the three IDMAPPS framework object
+   * @param {object=}  [obj2]    One of the three IDMAPPS framework object
+   * @param {object=}  [obj3]    One of the three IDMAPPS framework object
    */
-  function formInit( field, form, IDVault ) {
+  function formInit( obj1, obj2, obj3 ) {
     // Only appends the parameters passed so that we can check for the link's existence
     // before using it in the functions that require the User App/RBPM/IDMAPPS framework
-    if ( field != null ) {
-      IDMAPPS.field = field;
-      if ( 'web' in PublicAPI ) {
-        PublicAPI.web.field = field;
+    var fname, i, input = [];
+    fname = 'PRD.init(): ';
+    if ( obj1 != null ) {
+      input.push( obj1 );
+    } else {
+      logerror( fname + 'requires at least one parameter.' );
+    }
+    if ( obj2 != null ) {
+      input.push( obj2 );
+    }
+    if ( obj3 != null ) {
+      input.push( obj3 );
+    }
+    // Parse input parameters and setup the IDMAPPS internal variable
+    for ( i = 0; i < input.length; i++ ) {
+      if ( isField( input[ i ] ) && IDMAPPS.field === null ) {
+        logerror( fname + 'setting up internal reference to field.' );
+        IDMAPPS.field = input[ i ];
+        if ( 'web' in PublicAPI ) {
+          PublicAPI.web.field = input[ i ];
+        }
+      }
+      if ( isForm( input[ i ] ) && IDMAPPS.form === null ) {
+        logerror( fname + 'setting up internal reference to form.' );
+        IDMAPPS.form = input[ i ];
+        if ( 'web' in PublicAPI ) {
+          PublicAPI.web.form = input[ i ];
+        }
+      }
+      if ( isIDVault( input[ i ] ) && IDMAPPS.IDVault === null )
+      {
+        logerror( fname + 'setting up internal reference to IDVault.' );
+        IDMAPPS.IDVault = input[ i ];
+        if ( 'web' in PublicAPI ) {
+          PublicAPI.web.IDVault = input[ i ];
+        }
       }
     }
-    if ( form != null ) {
-      IDMAPPS.form = form;
-      if ( 'web' in PublicAPI ) {
-        PublicAPI.web.form = form;
+  }
+
+  /**
+   * Inspects if the object received has all the propeties in the array received and that they are typeof 'function'.
+   * @since 1.0.4
+   * @private
+   * @param {string}    obj    Object to check
+   * @param {string[]}  list   List of functions to validate that the object has them
+   * @type {boolean}
+   * @return {boolean} true if the obj has all functions listed, false otherwise.
+   */
+  function objectHasFunctions( obj, list ) {
+    var fname, i;
+    fname = 'objectHasFunctions(): ';
+    if ( obj === null || typeof obj !== 'object' || (! (list instanceof Array) ) || list.length === 0 ) {
+      debugmsg( fname + 'Please review your input parameters.');
+      return false;
+    }
+    for ( i = 0; i < list.length; i ++) {
+      if ( ! obj.hasOwnProperty( list[ i ] ) ) {
+        return false;
+      } else if ( typeof obj[ list[ i ] ] !== 'function' ) {
+        return false;
       }
     }
-    if ( IDVault != null ) {
-      IDMAPPS.IDVault = IDVault;
-    }
+    return true;
+  }
+
+  /**
+   * Inspects if the parameter provided is the IDMAPPS framework object 'field'.
+   * @since 1.0.4
+   * @private
+   * @param {string}  obj   Object to check
+   * @type {boolean}
+   * @return {boolean} true if the input is IDMAPPS framework field object, false otherwise.
+   */
+  function isField( obj ) {
+    var properties;
+    // Properties obtained from IDM 4.5 Object.keys( field ) executed on a web browser
+    properties = [ 'getName', 'getLabel', 'validate', 'fireEvent', 'hide',
+      'show', 'enable', 'disable', 'getValue', 'getValues', 'getAllValues',
+      'setValues', 'focus', 'select', 'activate', 'setRequired'
+    ];
+    return objectHasFunctions( obj, properties );
+  }
+
+  /**
+   * Inspects if the parameter provided is the IDMAPPS framework object 'form'.
+   * @since 1.0.4
+   * @private
+   * @param {string}  obj   Object to check
+   * @type {boolean}
+   * @return {boolean} true if the input is IDMAPPS framework field object, false otherwise.
+   */
+  function isForm( obj ) {
+    var properties;
+    // Properties obtained from IDM 4.5 Object.keys( form ) executed on a web browser
+    properties = [ 'getField', 'alert', 'showMsg', 'showWarning', 'showError',
+      'showFatal', 'validate', 'submit', 'getLabel', 'hide', 'show', 'enable',
+      'disable', 'getValue', 'getValues', 'getAllValues', 'setValues', 'focus',
+      'select', 'activate', 'setRequired', 'interceptAction', 'getLocale',
+      'getDefaultLocale', 'getRBMessage', 'stringToDate', 'dateToString',
+      'isValidDate', 'showDebugMsg', 'addCustomValidation', 'clearMessages'
+    ];
+    return objectHasFunctions( obj, properties );
+  }
+
+  /**
+   * Inspects if the parameter provided is the IDMAPPS framework object 'IDVault'
+   * @since 1.0.4
+   * @private
+   * @param {string}  obj   Object to check
+   * @type {boolean}
+   * @return {boolean} true if the input is IDMAPPS framework field object, false otherwise.
+   */
+  function isIDVault( obj ) {
+    var properties;
+    // Properties obtained from IDM 4.5 Object.keys( IDvault ) executed on a web browser
+    properties = [ 'globalQuery', 'containers', 'get', 'globalList',
+      'getGuidFromDn', 'getDnFromGuid', 'execService'
+    ];
+    return objectHasFunctions( obj, properties );
   }
 
   /**
