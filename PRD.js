@@ -257,6 +257,7 @@ var PRD = (function IIFE( logprefix, verbosemsg ) {
     logerror( res );
     return res;
   }
+
    /**
    * (Form only) Initializes references to the RBPM/IDMAPPS framework objects and save the same in the internal storage.
    * Uses IDVault internally on IDVget(), IDVglobalQuery(), GCVget(), getNamedPassword().
@@ -296,21 +297,20 @@ var PRD = (function IIFE( logprefix, verbosemsg ) {
         if ( 'web' in PublicAPI ) {
           PublicAPI.web.field = input[ i ];
         }
-      }
-      if ( isForm( input[ i ] ) && IDMAPPS.form === null ) {
+      } else if ( isForm( input[ i ] ) && IDMAPPS.form === null ) {
         logerror( fname + 'setting up internal reference to form.' );
         IDMAPPS.form = input[ i ];
         if ( 'web' in PublicAPI ) {
           PublicAPI.web.form = input[ i ];
         }
-      }
-      if ( isIDVault( input[ i ] ) && IDMAPPS.IDVault === null )
-      {
+      } else if ( isIDVault( input[ i ] ) && IDMAPPS.IDVault === null ) {
         logerror( fname + 'setting up internal reference to IDVault.' );
         IDMAPPS.IDVault = input[ i ];
         if ( 'web' in PublicAPI ) {
           PublicAPI.web.IDVault = input[ i ];
         }
+      } else {
+        logerror( fname + 'Parameter obj' + (i+1) + ' is not one of the 3 expected framework objects, skipping it.' );
       }
     }
   }
