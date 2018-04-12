@@ -2,7 +2,7 @@
  * Simple module to assist on workflow development.
  * Created to be imported in Overview > Global Scripts and used on both forms and engine.
  * @namespace PRD
- * @version 1.0.4wip
+ * @version 1.0.4
  * @license MIT License
  */
 var PRD = (function IIFE( logprefix, verbosemsg ) {
@@ -35,7 +35,7 @@ var PRD = (function IIFE( logprefix, verbosemsg ) {
    * @return {string} Module's version in the format M.m.p (Major, minor, patch)
    */
   function version() {
-    return 'work in progress';
+    return '1.0.4';
   }
 
   /**
