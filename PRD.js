@@ -1171,19 +1171,23 @@ function JSONget( inputJSON, whattoget, returntype ) {
 
   /**
    * Performs an IDVault.get and returns an ECMA array with the result.
+   * Refactored on v1.0.4 to replace the 4th optional parameter from IDVault injection to a form's field name.
+   * This change could break forms using prior versions, please double check your form code before moving to v1.0.4.
    *
    * @memberof PRD
    * @since 1.0.0
    *
-   * @param  {string} ldapdn    LDAP Fully Distinguised name of the eDirectory object to be queried.
-   * @param  {string} entkey    DAL entity key.
-   * @param  {string} attrkey   DAL attribute key. Attrribute must be configured under the DAL entity.
-   * @param  {object} [IDVobj]  (form mode only) Dependency injection for framework 'IDVault' object. Not needed if in engine mode. Not needed if in form mode and the module has been initialized with PRD.init()
+   * @param  {string} ldapdn       LDAP Fully Distinguised name of the eDirectory object to be queried.
+   * @param  {string} entkey       DAL entity key.
+   * @param  {string} attrkey      DAL attribute key. Attrribute must be configured under the DAL entity.
+   * @param  {string} [fieldname]  (form mode only) Name of the field to be auto-populated by the function.
+   *                               If the field name does not exist the form itself will present the error:
+   * "An error 'Field avocado not found or not instantiated yet.' was encountered while executing the script 'in IDVault.get()'".
    *
    * @type {string[]}
    * @return {string[]} ECMA array with the results. Empty if IDVault.get returned null, array with one or more elements otherwise.
    */
-  function IDVget( ldapdn, entkey, attrkey, IDVobj ) {
+  function IDVget( ldapdn, entkey, attrkey, fieldname ) {
     // Variable declaration. Keep all the declarations together.
     var qres = [];
     var gattr, gattrV, errmsg, fname;
@@ -1192,17 +1196,21 @@ function JSONget( inputJSON, whattoget, returntype ) {
     if ( where === 'engine' ) {
       IDVobj = IDVault;
     }
-    if ( where === 'form' && IDVobj == null && IDMAPPS.IDVault !== null ) {
-      IDVobj = IDMAPPS.IDVault;
+    if ( where === 'form' ) {
+      if ( IDMAPPS.IDVault !== null ) {
+        IDVobj = IDMAPPS.IDVault;
+      } else {
+        logerror( fname + 'please use PRD.init() with at least IDVault as a parameter to initialize the mandatory reference to the same. Aborting.' );
+        return qres;
+      }
     }
     // Check input parameters.
-    if ( ldapdn == null || entkey == null || attrkey == null || IDVobj == null ) {
+    if ( ldapdn == null || entkey == null || attrkey == null ) {
       errmsg = [];
       errmsg.push( fname + 'missing mandatory parameters.' );
       errmsg.push( 'ldapdn: ' + String( ldapdn ) + ',' );
       errmsg.push( 'entkey: ' + String( entkey ) + ',' );
       errmsg.push( 'attrkey: ' + String( attrkey ) + ',' );
-      errmsg.push( 'IDVobj: ' + String( IDVobj ) + '.' );
       logerror( errmsg.join( ' ' ) );
       return qres;
     }
@@ -1211,7 +1219,10 @@ function JSONget( inputJSON, whattoget, returntype ) {
     {
       // Function call parameters are different between engine and form
       if ( where === 'form' ) {
-        gattr = IDVobj.get( null, ldapdn, entkey, attrkey );
+        if ( fieldname == null ) {
+          fieldname = null;
+        }
+        gattr = IDVobj.get( fieldname, ldapdn, entkey, attrkey );
       }
       if ( where === 'engine' ) {
         gattr = IDVobj.get( ldapdn, entkey, attrkey );
@@ -1238,18 +1249,20 @@ function JSONget( inputJSON, whattoget, returntype ) {
 
   /**
    * Performs an IDVault.globalQuery and returns an object with the result.
+   * Refactored on v1.0.4 to replace the 4th optional parameter from IDVault injection to a form's field name.
+   * This change could break forms using prior versions, please double check your form code before moving to v1.0.4.
    *
    * @memberof PRD
    * @since 1.0.1
    *
    * @param  {string} dalquerykey  DAL Query key.
    * @param  {object} parameters   ECMA object with the paramters defined in the DAL Query. {parametername:parametervalue}
-   * @param  {object} [IDVobj]     (form mode only) Dependency injection for framework 'IDVault' object. Not needed if in engine mode. Not needed if in form mode and the module has been initialized with PRD.init()
+   * @param  {object} [fieldname]  (form mode only) Name of the field to be auto-populated by the function.
    *
    * @type {string[]}
    * @return {string[]} Array with LDAP DNs returned.
    */
-  function IDVglobalQuery( dalquerykey, parameters, IDVobj ) {
+  function IDVglobalQuery( dalquerykey, parameters, fieldname ) {
     // Variable declaration. Keep all the declarations together.
     var qres = [];
     var gqr, errmsg, pconv = '', fname;
@@ -1258,11 +1271,16 @@ function JSONget( inputJSON, whattoget, returntype ) {
     if ( where === 'engine' ) {
       IDVobj = IDVault;
     }
-    if ( where === 'form' && IDVobj == null && IDMAPPS.IDVault !== null ) {
-      IDVobj = IDMAPPS.IDVault;
+    if ( where === 'form' ) {
+      if ( IDMAPPS.IDVault !== null ) {
+        IDVobj = IDMAPPS.IDVault;
+      } else {
+        logerror( fname + 'please use PRD.init() with at least IDVault as a parameter to initialize the mandatory reference to the same. Aborting.' );
+        return qres;
+      }
     }
     // Check input parameters.
-    if ( dalquerykey == null || parameters == null || IDVobj == null ) {
+    if ( dalquerykey == null || parameters == null ) {
       errmsg = [];
       errmsg.push( fname + 'missing mandatory parameters.' );
       errmsg.push( 'dalquerykey: ' + String( dalquerykey ) + ',' );
@@ -1272,7 +1290,6 @@ function JSONget( inputJSON, whattoget, returntype ) {
         pconv = JSONstringify( parameters );
       }
       errmsg.push( 'parameters: ' + pconv + ',' );
-      errmsg.push( 'IDVobj: ' + String( IDVobj ) + '.' );
       logerror( errmsg.join( ' ' ) );
       return qres;
     }
@@ -1280,7 +1297,10 @@ function JSONget( inputJSON, whattoget, returntype ) {
     try {
       // Function call parameters are different between engine and form, as are return types.
       if ( where === 'form' ) {
-        gqr = IDVobj.globalQuery( null, dalquerykey, parameters );
+        if ( fieldname == null ) {
+          fieldname = null;
+        }
+        gqr = IDVobj.globalQuery( fieldname, dalquerykey, parameters );
         if ( gqr instanceof Array && gqr[ 0 ] instanceof Array > 0 && gqr[ 0 ][ 0 ] != '' ) {
           qres = gqr[ 0 ];
         }
