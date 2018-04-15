@@ -1,10 +1,10 @@
 <a name="PRD"></a>
 
 ## PRD : <code>object</code>
-Simple module to assist on workflow development.Created to be imported in Overview > Global Scripts and used on both forms and engine.
+Simple module to assist on workflow development.<br/>Created to be imported in Overview > Global Scripts and used on both forms and engine.<br/>v1.0.5 breaking change - Compare() and Unique() renamed to compare() and unique() as per #20 .<br/>
 
 **Kind**: global namespace  
-**Version**: 1.0.4  
+**Version**: 1.0.5  
 **License**: MIT License  
 
 * [PRD](#PRD) : <code>object</code>
@@ -19,14 +19,15 @@ Simple module to assist on workflow development.Created to be imported in Overv
         * [.coerceToString(input, [defVal])](#PRD.util.coerceToString) ⇒ <code>string</code>
         * [.basicHTTPauthHeader(username, password)](#PRD.util.basicHTTPauthHeader) ⇒ <code>string</code>
         * [.shouldRetry(curcounter, maxretries)](#PRD.util.shouldRetry) ⇒ <code>boolean</code>
-        * [.Compare(list1, list2, ignorecase)](#PRD.util.Compare) ⇒ <code>Array.&lt;Array.&lt;string&gt;&gt;</code>
-        * [.Unique(obj, ignorecase)](#PRD.util.Unique) ⇒ <code>Array.&lt;string&gt;</code> \| <code>java.util.Vector</code>
+        * [.compare(list1, list2, ignorecase)](#PRD.util.compare) ⇒ <code>Array.&lt;Array.&lt;string&gt;&gt;</code>
+        * [.unique(obj, ignorecase)](#PRD.util.unique) ⇒ <code>Array.&lt;string&gt;</code> \| <code>java.util.Vector</code>
         * [.getObject2arr(list)](#PRD.util.getObject2arr) ⇒ <code>array.&lt;(object\|string)&gt;</code> \| <code>null</code>
         * [.JavaVectorToECMAArray(v)](#PRD.util.JavaVectorToECMAArray) ⇒ <code>Array.&lt;string&gt;</code>
         * [.ECMAArrayToJavaVector(arr)](#PRD.util.ECMAArrayToJavaVector) ⇒ <code>java.util.Vector</code>
-        * [.GCVget(GCVname, returnType, DefaultValue)](#PRD.util.GCVget) ⇒ <code>string</code> \| <code>number</code> \| <code>boolean</code>
-        * [.getNamedPassword(NamedPassword, try5times)](#PRD.util.getNamedPassword) ⇒ <code>string</code> \| <code>null</code>
+        * [.GCVget(GCVname, [returnType], [DefaultValue])](#PRD.util.GCVget) ⇒ <code>string</code> \| <code>number</code> \| <code>boolean</code>
+        * [.getNamedPassword(NamedPassword, [try5times])](#PRD.util.getNamedPassword) ⇒ <code>string</code> \| <code>null</code>
     * [.web](#PRD.web) : <code>object</code>
+        * [.debugmessages(bool)](#PRD.web.debugmessages)
         * [.fieldVisibility(event, field)](#PRD.web.fieldVisibility)
     * [.version()](#PRD.version) ⇒ <code>string</code>
     * [.setlogprefix(str)](#PRD.setlogprefix)
@@ -53,18 +54,18 @@ Utility functions for use in  Identity Manager work flow development.
     * [.coerceToString(input, [defVal])](#PRD.util.coerceToString) ⇒ <code>string</code>
     * [.basicHTTPauthHeader(username, password)](#PRD.util.basicHTTPauthHeader) ⇒ <code>string</code>
     * [.shouldRetry(curcounter, maxretries)](#PRD.util.shouldRetry) ⇒ <code>boolean</code>
-    * [.Compare(list1, list2, ignorecase)](#PRD.util.Compare) ⇒ <code>Array.&lt;Array.&lt;string&gt;&gt;</code>
-    * [.Unique(obj, ignorecase)](#PRD.util.Unique) ⇒ <code>Array.&lt;string&gt;</code> \| <code>java.util.Vector</code>
+    * [.compare(list1, list2, ignorecase)](#PRD.util.compare) ⇒ <code>Array.&lt;Array.&lt;string&gt;&gt;</code>
+    * [.unique(obj, ignorecase)](#PRD.util.unique) ⇒ <code>Array.&lt;string&gt;</code> \| <code>java.util.Vector</code>
     * [.getObject2arr(list)](#PRD.util.getObject2arr) ⇒ <code>array.&lt;(object\|string)&gt;</code> \| <code>null</code>
     * [.JavaVectorToECMAArray(v)](#PRD.util.JavaVectorToECMAArray) ⇒ <code>Array.&lt;string&gt;</code>
     * [.ECMAArrayToJavaVector(arr)](#PRD.util.ECMAArrayToJavaVector) ⇒ <code>java.util.Vector</code>
-    * [.GCVget(GCVname, returnType, DefaultValue)](#PRD.util.GCVget) ⇒ <code>string</code> \| <code>number</code> \| <code>boolean</code>
-    * [.getNamedPassword(NamedPassword, try5times)](#PRD.util.getNamedPassword) ⇒ <code>string</code> \| <code>null</code>
+    * [.GCVget(GCVname, [returnType], [DefaultValue])](#PRD.util.GCVget) ⇒ <code>string</code> \| <code>number</code> \| <code>boolean</code>
+    * [.getNamedPassword(NamedPassword, [try5times])](#PRD.util.getNamedPassword) ⇒ <code>string</code> \| <code>null</code>
 
 <a name="PRD.util.JSONobj"></a>
 
 #### util.JSONobj : <code>object</code>
-Proxy for the actual JSON object used in browsers (JSON) or workflow engine (ScriptVault.JSON).Wraps the parse() and stringify() calls in try/catch blocks to report errors via logerror() instead ofletting the workflow engine break its regular flow when an error occurs.
+Proxy for the actual JSON object used in browsers (JSON) or workflow engine (ScriptVault.JSON).<br/>Wraps the parse() and stringify() calls in try/catch blocks to report errors via logerror() instead ofletting the workflow engine break its regular flow when an error occurs.
 
 **Kind**: static namespace of [<code>util</code>](#PRD.util)  
 **Since**: 1.0.2  
@@ -78,7 +79,7 @@ Proxy for the actual JSON object used in browsers (JSON) or workflow engine (Scr
 <a name="PRD.util.JSONobj.parse"></a>
 
 ##### JSONobj.parse(s, [reviver]) ⇒ <code>object</code> \| <code>object</code>
-Wrapper for the parse() call on the host environment's JSON object.See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/parse
+Wrapper for the parse() call on the host environment's JSON object.<br/>See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/parse
 
 **Kind**: static method of [<code>JSONobj</code>](#PRD.util.JSONobj)  
 **Since**: 1.0.2  
@@ -91,7 +92,7 @@ Wrapper for the parse() call on the host environment's JSON object.See https://
 <a name="PRD.util.JSONobj.stringify"></a>
 
 ##### JSONobj.stringify(o, [replacer], [space]) ⇒ <code>string</code> \| <code>string</code>
-Wrapper for the stringify() call on the host environment's JSON object.See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify
+Wrapper for the stringify() call on the host environment's JSON object.<br/>See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify
 
 **Kind**: static method of [<code>JSONobj</code>](#PRD.util.JSONobj)  
 **Since**: 1.0.2  
@@ -105,7 +106,7 @@ Wrapper for the stringify() call on the host environment's JSON object.See http
 <a name="PRD.util.JSONobj.test"></a>
 
 ##### JSONobj.test(inputJSON, whattotest) ⇒ <code>boolean</code>
-Verify if an ECMA object has the selected location.Note: To reference properties with a dot in their name use the format ["property.name"] .Ported from IDM engine to RBPM. IDM Engine version at https://github.com/fchierad/IDM-ECMAlib/blob/v1.0.2/JSONlib-JS.js
+Verify if an ECMA object has the selected location.<br/>Note: To reference properties with a dot in their name use the format ["property.name"] .<br/>Ported from IDM engine to RBPM. IDM Engine version at https://github.com/fchierad/IDM-ECMAlib/blob/v1.0.2/JSONlib-JS.js
 
 **Kind**: static method of [<code>JSONobj</code>](#PRD.util.JSONobj)  
 **Returns**: <code>boolean</code> - true if the path is found, false otherwise  
@@ -119,7 +120,7 @@ Verify if an ECMA object has the selected location.Note: To reference propertie
 <a name="PRD.util.JSONobj.get"></a>
 
 ##### JSONobj.get(inputJSON, whattoget, [returntype]) ⇒ <code>string</code> \| <code>number</code> \| <code>boolean</code> \| <code>object</code>
-Retrieves a property of an ECMA object (or its subordinate object) and returns it in the specified type.Note: To reference properties with a dot in their name use the format ["property.name"] .Ported from IDM engine to RBPM. IDM Engine version at https://github.com/fchierad/IDM-ECMAlib/blob/v1.0.2/JSONlib-JS.js
+Retrieves a property of an ECMA object (or its subordinate object) and returns it in the specified type.<br/>Note: To reference properties with a dot in their name use the format ["property.name"] .<br/>Ported from IDM engine to RBPM. IDM Engine version at https://github.com/fchierad/IDM-ECMAlib/blob/v1.0.2/JSONlib-JS.js
 
 **Kind**: static method of [<code>JSONobj</code>](#PRD.util.JSONobj)  
 **Returns**: <code>string</code> \| <code>number</code> \| <code>boolean</code> \| <code>object</code> - Selected property's value in the selected format. If parsing of the object fails returns an empty string  
@@ -142,7 +143,7 @@ Try to detect if we are in a web browser or in the User App/RBPM/IDMAPPs workflo
 <a name="PRD.util.logerror"></a>
 
 #### util.logerror(msg) ⇒ <code>boolean</code>
-Output error message based on where the code is running.Output to the console.log() if in a browser, to catalina.out if in the workflow engine.Prepends the value of the module's internal 'prefix' variable.
+Output error message based on where the code is running.<br/>Output to the console.log() if in a browser, to catalina.out if in the workflow engine.<br/>Prepends the value of the module's internal 'prefix' variable.
 
 **Kind**: static method of [<code>util</code>](#PRD.util)  
 **Returns**: <code>boolean</code> - true if the message was returned successfully, false otherwise.  
@@ -155,7 +156,7 @@ Output error message based on where the code is running.Output to the console.l
 <a name="PRD.util.coerceToString"></a>
 
 #### util.coerceToString(input, [defVal]) ⇒ <code>string</code>
-Coerces the result to an ECMA string.Coercion rules for this function:If the first input parameter is null or undefined returns default value.If the first input parameter is an Array it returns the array joined by ' '.If the first input parameter is a String, Number or Boolean it returns a string.If the first input parameter is an object other than an Array it returns the default value.If the second input value is not null then the default value becomes the second input value.If the coercion to string from String, Number, Boolean or Array resulted in empty string, return default value.
+Coerces the result to an ECMA string.<br/>Coercion rules for this function:<br/>If the first input parameter is null or undefined returns default value.<br/>If the first input parameter is an Array it returns the array joined by ' '.<br/>If the first input parameter is a String, Number or Boolean it returns a string.<br/>If the first input parameter is an object other than an Array it returns the default value.<br/>If the second input value is not null then the default value becomes the second input value.<br/>If the coercion to string from String, Number, Boolean or Array resulted in empty string, return default value.
 
 **Kind**: static method of [<code>util</code>](#PRD.util)  
 **Returns**: <code>string</code> - resulting string.  
@@ -194,10 +195,10 @@ Coerces the result to an ECMA string.Coercion rules for this function:If the f
 | curcounter | <code>string</code> | Current Counter |
 | maxretries | <code>string</code> | Maximum retries value |
 
-<a name="PRD.util.Compare"></a>
+<a name="PRD.util.compare"></a>
 
-#### util.Compare(list1, list2, ignorecase) ⇒ <code>Array.&lt;Array.&lt;string&gt;&gt;</code>
-(Engine only) Compares 2 unidimensional ECMA Arrays or Java Vectors and an Array of arrays with comparison results.
+#### util.compare(list1, list2, ignorecase) ⇒ <code>Array.&lt;Array.&lt;string&gt;&gt;</code>
+(Engine) Compares 2 unidimensional ECMA Arrays or Java Vectors and returns an Array of arrays with comparison results.<br/>(Form) Compares 2 unidimensional ECMA Arrays and returns an Array of arrays with comparison results.
 
 **Kind**: static method of [<code>util</code>](#PRD.util)  
 **Returns**: <code>Array.&lt;Array.&lt;string&gt;&gt;</code> - ECMA Array with 3 parts. [ [ elements only present on list1 ], [ elements only present on list2 ], [ elements present on both] ]  
@@ -207,12 +208,12 @@ Coerces the result to an ECMA string.Coercion rules for this function:If the f
 | --- | --- | --- |
 | list1 | <code>Array.&lt;string&gt;</code> \| <code>java.util.Vector</code> | ECMA Array or Java Vector. |
 | list2 | <code>Array.&lt;string&gt;</code> \| <code>java.util.Vector</code> | ECMA Array or Java Vector. |
-| ignorecase | <code>boolean</code> | Changes string comparison to case insensitive. |
+| ignorecase | <code>boolean</code> | Changes string comparison to case insensitive.                                                    This also causes the casing of the results will match the casing of their                                                    first time appearing in the list provided. |
 
-<a name="PRD.util.Unique"></a>
+<a name="PRD.util.unique"></a>
 
-#### util.Unique(obj, ignorecase) ⇒ <code>Array.&lt;string&gt;</code> \| <code>java.util.Vector</code>
-(Engine only) Parses an unidimensional ECMA Array or Java Vector and returns the same type of object with only unique entries.
+#### util.unique(obj, ignorecase) ⇒ <code>Array.&lt;string&gt;</code> \| <code>java.util.Vector</code>
+(Engine) Parses an unidimensional ECMA Array or Java Vector and returns the same type of object with only unique entries.<br/>(Form) Parses an unidimensional ECMA Array and returns the same type of object with only unique entries.
 
 **Kind**: static method of [<code>util</code>](#PRD.util)  
 **Returns**: <code>Array.&lt;string&gt;</code> \| <code>java.util.Vector</code> - ECMA Array or Java Vector. If obj is not a valid type returns empty ECMA Array.  
@@ -221,12 +222,12 @@ Coerces the result to an ECMA string.Coercion rules for this function:If the f
 | Param | Type | Description |
 | --- | --- | --- |
 | obj | <code>Array.&lt;string&gt;</code> \| <code>java.util.Vector</code> | ECMA Array or Java Vector. |
-| ignorecase | <code>boolean</code> | Changes string comparison to case insensitive.                                                    This means the casing of the results will match the casing of their                                                    first time appearing in the list provided. |
+| ignorecase | <code>boolean</code> | Changes string comparison to case insensitive.                                                    This also causes the casing of the results will match the casing of their                                                    first time appearing in the list provided. |
 
 <a name="PRD.util.getObject2arr"></a>
 
 #### util.getObject2arr(list) ⇒ <code>array.&lt;(object\|string)&gt;</code> \| <code>null</code>
-(Engine only) Parses the result from flowdata.getObject into an Array of strings and ECMA objects.Each DOM element node will be an object's property name, and each property will containan array of items. Those items cam be strings or other objects.
+(Engine only) Parses the result from flowdata.getObject into an Array of strings and ECMA objects.<br/>Each DOM element node will be an object's property name, and each property will containan array of items. Those items cam be strings or other objects.
 
 **Kind**: static method of [<code>util</code>](#PRD.util)  
 **Returns**: <code>array.&lt;(object\|string)&gt;</code> \| <code>null</code> - ECMA Array of objects and string. If error occur returns null.  
@@ -239,7 +240,7 @@ Coerces the result to an ECMA string.Coercion rules for this function:If the f
 <a name="PRD.util.JavaVectorToECMAArray"></a>
 
 #### util.JavaVectorToECMAArray(v) ⇒ <code>Array.&lt;string&gt;</code>
-(Engine only) Converts a unidimensional Java Vector whose entries are strings to an ECMA Array.https://docs.oracle.com/javase/8/docs/api/java/util/Vector.html
+(Engine only) Converts a unidimensional Java Vector whose entries are strings to an ECMA Array.<br/>https://docs.oracle.com/javase/8/docs/api/java/util/Vector.html
 
 **Kind**: static method of [<code>util</code>](#PRD.util)  
 **Returns**: <code>Array.&lt;string&gt;</code> - ECMA array.  
@@ -252,7 +253,7 @@ Coerces the result to an ECMA string.Coercion rules for this function:If the f
 <a name="PRD.util.ECMAArrayToJavaVector"></a>
 
 #### util.ECMAArrayToJavaVector(arr) ⇒ <code>java.util.Vector</code>
-(Engine only) Converts a unidimensional ECMA array whose entries are strings to a Java Vector.https://docs.oracle.com/javase/8/docs/api/java/util/Vector.html
+(Engine only) Converts a unidimensional ECMA array whose entries are strings to a Java Vector.<br/>https://docs.oracle.com/javase/8/docs/api/java/util/Vector.html
 
 **Kind**: static method of [<code>util</code>](#PRD.util)  
 **Returns**: <code>java.util.Vector</code> - Java Vector.  
@@ -264,7 +265,7 @@ Coerces the result to an ECMA string.Coercion rules for this function:If the f
 
 <a name="PRD.util.GCVget"></a>
 
-#### util.GCVget(GCVname, returnType, DefaultValue) ⇒ <code>string</code> \| <code>number</code> \| <code>boolean</code>
+#### util.GCVget(GCVname, [returnType], [DefaultValue]) ⇒ <code>string</code> \| <code>number</code> \| <code>boolean</code>
 (Engine only) Wraper for GCV.get . Attempts to retrieve the GCV value. returns the default value (or '' if no default provided)
 
 **Kind**: static method of [<code>util</code>](#PRD.util)  
@@ -274,13 +275,13 @@ Coerces the result to an ECMA string.Coercion rules for this function:If the f
 | Param | Type | Description |
 | --- | --- | --- |
 | GCVname | <code>string</code> | Name of the GCV to be retrieved. |
-| returnType | <code>string</code> | 'string', 'number' or 'boolean'. Forces coercion to said type for the return. Defaults to 'string if not provided or any other value. |
-| DefaultValue | <code>string</code> | Default value to be used if the GCV.get() fails. Defaults to '' if not provided. |
+| [returnType] | <code>string</code> | 'string', 'number' or 'boolean'. Forces coercion to said type for the return.                                   Defaults to 'string' if not provided or any other value. |
+| [DefaultValue] | <code>string</code> | Default value to be used if the GCV.get() fails. Defaults to '' if not provided. |
 
 <a name="PRD.util.getNamedPassword"></a>
 
-#### util.getNamedPassword(NamedPassword, try5times) ⇒ <code>string</code> \| <code>null</code>
-(Engine only) Wraper for GCV.getValueForNamedPassword. Attempts to retrieve the named password value using aGCV-ref as the bridge for the same. If it fails attemps up to 5 retries with 1 second pause in between them.
+#### util.getNamedPassword(NamedPassword, [try5times]) ⇒ <code>string</code> \| <code>null</code>
+(Engine only) Wraper for GCV.getValueForNamedPassword. Attempts to retrieve thenamed password value using a GCV-ref as the bridge for the same.<br/>If the second parameter is true and the named password read fails the function attempsup to 5 retries with 1 second pause in between them.
 
 **Kind**: static method of [<code>util</code>](#PRD.util)  
 **Returns**: <code>string</code> \| <code>null</code> - GCV.getValueForNamedPassword result or null.  
@@ -289,7 +290,7 @@ Coerces the result to an ECMA string.Coercion rules for this function:If the f
 | Param | Type | Description |
 | --- | --- | --- |
 | NamedPassword | <code>string</code> | Name of the GCV-ref to the Named Password to be retrieved. |
-| try5times | <code>any</code> | If not provided or null a single read is attempted.                                 If provides and read fails try 4 more times, with 1 second pause between them. |
+| [try5times] | <code>any</code> | If not provided or null a single read is attempted.                                 If provides and read fails try 4 more times, with 1 second pause between them. |
 
 <a name="PRD.web"></a>
 
@@ -298,10 +299,27 @@ Functions and objects that can only be accessed in work flow forms.
 
 **Kind**: static namespace of [<code>PRD</code>](#PRD)  
 **Since**: 1.0.4  
+
+* [.web](#PRD.web) : <code>object</code>
+    * [.debugmessages(bool)](#PRD.web.debugmessages)
+    * [.fieldVisibility(event, field)](#PRD.web.fieldVisibility)
+
+<a name="PRD.web.debugmessages"></a>
+
+#### web.debugmessages(bool)
+Sets library in debug mode. The other way to do so is to pass true as the second parameter on the library import.
+
+**Kind**: static method of [<code>web</code>](#PRD.web)  
+**Since**: 1.0.5  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| bool | <code>boolean</code> | true to set the library to debug mode, false to disable debug more. |
+
 <a name="PRD.web.fieldVisibility"></a>
 
 #### web.fieldVisibility(event, field)
-(Form only) When added in the event section of a form field, allow us to show and hide that field by usingfield.fireEvent( event-name, action );Where event-name is the event's name and action is either 'show' or 'hide'Since the field visibility functions only exist inside the field context we need to pass both objects from wherethe function is being called to use them inside that scope/context. Inside the event we just need to add the line:IAtools.fieldVisibility( event, field );to properly use this function. No need to change anything on the line above, it is already passing the event and field objectsas seen in the scope of that particular form field.no return value provided.
+(Form only) When added in the event section of a form field, allow us to show and hide that field by using<br/>field.fireEvent( event-name, action );<br/>Where event-name is the event's name and action is either 'show' or 'hide'<br/><br/>Since the field visibility functions only exist inside the field context we need to pass both objects from wherethe function is being called to use them inside that scope/context. Inside the event we just need to add the line:<br/>IAtools.fieldVisibility( event, field );<br/>to properly use this function. No need to change anything on the line above, it is already passing the event and field objectsas seen in the scope of that particular form field.<br/><br/>no return value provided.
 
 **Kind**: static method of [<code>web</code>](#PRD.web)  
 **Since**: 1.0.4  
@@ -322,7 +340,7 @@ Return module version.
 <a name="PRD.setlogprefix"></a>
 
 ### PRD.setlogprefix(str)
-Set prefix for the log activities generated by logerror() on both engine and form.Given that forms instantiate the module on load, setting the value inside a form would affect only said form.Given that the workflow engine can pause processing at points and remove the thread from memory, reading the sameagain later, calling this function anywhere outside the Overview > Global Scripts might cause the value set to be lostafter such pauses. One example of such pauses/behavior is when a workflow reaches an approval activity.
+Set prefix for the log activities generated by logerror() on both engine and form.<br/>Given that forms instantiate the module on load, setting the value inside a form would affect only said form.<br/>Given that the workflow engine can pause processing at points and remove the thread from memory, reading the sameagain later, calling this function anywhere outside the Overview > Global Scripts might cause the value set to be lostafter such pauses. One example of such pauses/behavior is when a workflow reaches an approval activity.
 
 **Kind**: static method of [<code>PRD</code>](#PRD)  
 **Since**: 1.0.2  
@@ -334,7 +352,7 @@ Set prefix for the log activities generated by logerror() on both engine and for
 <a name="PRD.init"></a>
 
 ### PRD.init(obj1, [obj2], [obj3])
-(Form only) Initializes references to the RBPM/IDMAPPS framework objects and save the same in the internal storage.Uses IDVault internally on IDVget(), IDVglobalQuery(), GCVget(), getNamedPassword().Exports field as PRD.web.field and form as PRD.web.form for usage inside global scripts.Refactored to accept 1 to 3 parameters with the framework objects in any order.Returns nothing.
+(Form only) Initializes references to the RBPM/IDMAPPS framework objects and save the same in the internal storage.<br/>Uses IDVault internally on IDVget(), IDVglobalQuery(), GCVget(), getNamedPassword().<br/>Exports field as PRD.web.field and form as PRD.web.form for usage inside global scripts.<br/>Refactored to accept 1 to 3 parameters with the framework objects in any order.<br/>Returns nothing.
 
 **Kind**: static method of [<code>PRD</code>](#PRD)  
 **Since**: 1.0.0  
@@ -348,7 +366,7 @@ Set prefix for the log activities generated by logerror() on both engine and for
 <a name="PRD.IDVget"></a>
 
 ### PRD.IDVget(ldapdn, entkey, attrkey, [fieldname]) ⇒ <code>Array.&lt;string&gt;</code>
-Performs an IDVault.get and returns an ECMA array with the result.Refactored on v1.0.4 to replace the 4th optional parameter from IDVault injection to a form's field name.This change could break forms using prior versions, please double check your form code before moving to v1.0.4.
+Performs an IDVault.get and returns an ECMA array with the result.<br/>Refactored on v1.0.4 to replace the 4th optional parameter from IDVault injection to a form's field name.<br/>This change could break forms using prior versions, please double check your form code before moving to v1.0.4.
 
 **Kind**: static method of [<code>PRD</code>](#PRD)  
 **Returns**: <code>Array.&lt;string&gt;</code> - ECMA array with the results. Empty if IDVault.get returned null, array with one or more elements otherwise.  
@@ -364,7 +382,7 @@ Performs an IDVault.get and returns an ECMA array with the result.Refactored on
 <a name="PRD.IDVglobalQuery"></a>
 
 ### PRD.IDVglobalQuery(dalquerykey, parameters, [fieldname]) ⇒ <code>Array.&lt;string&gt;</code>
-Performs an IDVault.globalQuery and returns an object with the result.Refactored on v1.0.4 to replace the 4th optional parameter from IDVault injection to a form's field name.This change could break forms using prior versions, please double check your form code before moving to v1.0.4.
+Performs an IDVault.globalQuery and returns an object with the result.<br/>Refactored on v1.0.4 to replace the 4th optional parameter from IDVault injection to a form's field name.<br/>This change could break forms using prior versions, please double check your form code before moving to v1.0.4.
 
 **Kind**: static method of [<code>PRD</code>](#PRD)  
 **Returns**: <code>Array.&lt;string&gt;</code> - Array with LDAP DNs returned.  
