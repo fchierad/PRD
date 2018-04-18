@@ -16,6 +16,11 @@ Simple module to assist on workflow development.<br/>Created to be imported in 
             * [.get(inputJSON, whattoget, [returntype])](#PRD.util.JSONobj.get) ⇒ <code>string</code> \| <code>number</code> \| <code>boolean</code> \| <code>object</code>
         * [.formOrEngine()](#PRD.util.formOrEngine) ⇒ <code>string</code>
         * [.logerror(msg)](#PRD.util.logerror) ⇒ <code>boolean</code>
+        * [.inspectType(input)](#PRD.util.inspectType) ⇒ <code>string</code>
+        * [.isString(input)](#PRD.util.isString) ⇒ <code>boolean</code>
+        * [.isNumber(input)](#PRD.util.isNumber) ⇒ <code>boolean</code>
+        * [.isBoolean(input)](#PRD.util.isBoolean) ⇒ <code>boolean</code>
+        * [.isJavaVector(input)](#PRD.util.isJavaVector) ⇒ <code>boolean</code>
         * [.coerceToString(input, [defVal])](#PRD.util.coerceToString) ⇒ <code>string</code>
         * [.basicHTTPauthHeader(username, password)](#PRD.util.basicHTTPauthHeader) ⇒ <code>string</code>
         * [.shouldRetry(curcounter, maxretries)](#PRD.util.shouldRetry) ⇒ <code>boolean</code>
@@ -51,6 +56,11 @@ Utility functions for use in  Identity Manager work flow development.
         * [.get(inputJSON, whattoget, [returntype])](#PRD.util.JSONobj.get) ⇒ <code>string</code> \| <code>number</code> \| <code>boolean</code> \| <code>object</code>
     * [.formOrEngine()](#PRD.util.formOrEngine) ⇒ <code>string</code>
     * [.logerror(msg)](#PRD.util.logerror) ⇒ <code>boolean</code>
+    * [.inspectType(input)](#PRD.util.inspectType) ⇒ <code>string</code>
+    * [.isString(input)](#PRD.util.isString) ⇒ <code>boolean</code>
+    * [.isNumber(input)](#PRD.util.isNumber) ⇒ <code>boolean</code>
+    * [.isBoolean(input)](#PRD.util.isBoolean) ⇒ <code>boolean</code>
+    * [.isJavaVector(input)](#PRD.util.isJavaVector) ⇒ <code>boolean</code>
     * [.coerceToString(input, [defVal])](#PRD.util.coerceToString) ⇒ <code>string</code>
     * [.basicHTTPauthHeader(username, password)](#PRD.util.basicHTTPauthHeader) ⇒ <code>string</code>
     * [.shouldRetry(curcounter, maxretries)](#PRD.util.shouldRetry) ⇒ <code>boolean</code>
@@ -152,6 +162,71 @@ Output error message based on where the code is running.<br/>Output to the cons
 | Param | Type | Description |
 | --- | --- | --- |
 | msg | <code>string</code> | Error message to be logged. |
+
+<a name="PRD.util.inspectType"></a>
+
+#### util.inspectType(input) ⇒ <code>string</code>
+Returns the type of an ECMA object or class of a Java object.<br/>For ECMA relies on typeof and instanceof, if neither works uses Object.prototype.toString .<br/>For Java objects just calls getClass().<br/>Prints result when module is ran in debug mode, returns result as string.
+
+**Kind**: static method of [<code>util</code>](#PRD.util)  
+**Returns**: <code>string</code> - analysis result  
+**Since**: 1.0.5  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| input | <code>any</code> | ECMA or Java input |
+
+<a name="PRD.util.isString"></a>
+
+#### util.isString(input) ⇒ <code>boolean</code>
+Checks if the provided input is an ECMA String (primitive or object).
+
+**Kind**: static method of [<code>util</code>](#PRD.util)  
+**Returns**: <code>boolean</code> - true if string, false otherwise  
+**Since**: 1.0.5  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| input | <code>any</code> | Input value whose type will be evaluated |
+
+<a name="PRD.util.isNumber"></a>
+
+#### util.isNumber(input) ⇒ <code>boolean</code>
+Checks if the provided input is an ECMA Number (primitive or object).
+
+**Kind**: static method of [<code>util</code>](#PRD.util)  
+**Returns**: <code>boolean</code> - true if number, false otherwise  
+**Since**: 1.0.5  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| input | <code>any</code> | Input value whose type will be evaluated |
+
+<a name="PRD.util.isBoolean"></a>
+
+#### util.isBoolean(input) ⇒ <code>boolean</code>
+Checks if the provided input is an ECMA Boolean (primitive or object).
+
+**Kind**: static method of [<code>util</code>](#PRD.util)  
+**Returns**: <code>boolean</code> - true if boolean, false otherwise  
+**Since**: 1.0.5  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| input | <code>any</code> | Input value whose type will be evaluated |
+
+<a name="PRD.util.isJavaVector"></a>
+
+#### util.isJavaVector(input) ⇒ <code>boolean</code>
+Checks if the provided input is a Java Vector.
+
+**Kind**: static method of [<code>util</code>](#PRD.util)  
+**Returns**: <code>boolean</code> - true if Java Vector, false otherwise  
+**Since**: 1.0.5  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| input | <code>any</code> | Input value whose type will be evaluated |
 
 <a name="PRD.util.coerceToString"></a>
 
