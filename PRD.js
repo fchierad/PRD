@@ -352,7 +352,7 @@ var PRD = (function IIFE( logprefix, verbosemsg ) {
   }
 
   /**
-   * Checks if the provided input is a Java Vector.
+   * (Engine only) Checks if the provided input is a Java Vector.
    *
    * @memberof PRD.util
    * @since 1.0.5

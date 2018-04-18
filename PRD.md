@@ -218,7 +218,7 @@ Checks if the provided input is an ECMA Boolean (primitive or object).
 <a name="PRD.util.isJavaVector"></a>
 
 #### util.isJavaVector(input) ⇒ <code>boolean</code>
-Checks if the provided input is a Java Vector.
+(Engine only) Checks if the provided input is a Java Vector.
 
 **Kind**: static method of [<code>util</code>](#PRD.util)  
 **Returns**: <code>boolean</code> - true if Java Vector, false otherwise  
