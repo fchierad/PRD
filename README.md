@@ -24,7 +24,7 @@ More information about the product this can be used with can be found at <a href
 
     For example, rather than putting a user’s GivenName + SN into a flow data node, and then later putting the user’s FullName into that same node: put it in a new node. This way we can see how the whole workflow unfolded at any point in the future, without having to re-create the state at a previous workflow activity.
 
-    This is especially important regarding the workflow's initial values fed into flowdata from the Start activity's request form. By having those values it is possible to review and even re-issue an workflow at some point in the future.
+    This is especially important regarding the workflow's initial values fed into flowdata from the Start activity's request form. By having those values it is possible to review and even re-issue a workflow at some point in the future.
 
     Obviously this cannot always be avoided - Loops, incrementing counters and so forth - so use good judgement.
 
@@ -36,7 +36,7 @@ More information about the product this can be used with can be found at <a href
 
 4. Map Activity suggestions:
 
-    To make your workflow more readable try to make your "Source Expression" short or even a single function call. For this to bepossible build your functions into Overview > Global Scripts with meaningful names and detailed comments on function usage, parameters and expected return values. I tend to follow the jsdoc standard on function comments to be able to auto-generate documentation from source code+comments using automated tools.
+    To make your workflow more readable try to make your "Source Expression" short or even a single function call. For this to be possible build your functions into Overview > Global Scripts with meaningful names and detailed comments on function usage, parameters and expected return values. I tend to follow the jsdoc standard on function comments to be able to auto-generate documentation from source code+comments using automated tools.
 
     To complement the above we should try to reuse functions as much as we can. One or few small, well-named, generic functions should meet most use cases. Function reuse across activities and workflows can save time and effort in the long run, as well as make the code easier to maintain and change.
 
@@ -53,12 +53,12 @@ More information about the product this can be used with can be found at <a href
 
     The timeout value should be a parameter set in a flowdata section before the delay.
 
-    Approval form should be simple and only be relevant if we allow early advancement via approval/denial. In that case these paths should pass by a log message to record that an early advancement (or cancellation if you allow that) happened, and log by whom it happened. If no interation is allows just create a form with a single field describing it is a wait/delay/pause activity and add some onload event to hide the buttons of said form.
+    Approval form should be simple and only be relevant if we allow early advancement via approval/denial. In that case these paths should pass by a log message to record that an early advancement (or cancellation) happened, and log by whom it happened. If no interation is allowed just create a form with a single field describing it is a wait/delay/pause activity and add an onload event to hide the buttons of said form.
 
 
 6. Activity ID recommendations
 
-    Change the activity ID of activities that will be referenced in later code from their default Activity# value, to make said code more readable.
+    Change the activity ID of activities that will be referenced in later code from their default Activity# value, to make your code more readable.
 
     Personal preference is to start the ID with a 3 or 4 letter abbreviation such as map, log, appr, cond, inte, rest, stat, and so on; followed by camel case short name to describe what it does. This way when referring back to them we can have expressions like apprFromManager.getAddressee() instead of Activity657.getAddressee().
 
