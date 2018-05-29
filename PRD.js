@@ -6,31 +6,32 @@
  * @version 1.0.5
  * @license MIT License
  */
-var PRD = (function IIFE( logprefix, verbosemsg ) {
+var PRD = (function IIFE(logprefix, verbosemsg) {
   // Exported public API. Functions and variables not declared here will remain private to this module
   var PublicAPI = {
     util: {
-      formOrEngine:formOrEngine,
-      logerror:logerror,
-      coerceToString:coerceToString,
+      formOrEngine: formOrEngine,
+      logerror: logerror,
+      coerceToString: coerceToString,
       JSONobj: {
-        parse:JSONparse,
-        stringify:JSONstringify,
-        get:JSONget,
-        test:JSONtest
+        parse: JSONparse,
+        stringify: JSONstringify,
+        get: JSONget,
+        test: JSONtest
       },
-      compare:compare,
-      unique:unique,
-      inspectType:inspectType,
-      isString:isString,
-      isNumber:isNumber,
-      isBoolean:isBoolean
+      compare: compare,
+      intersectArrays: intersectArrays,
+      unique: unique,
+      inspectType: inspectType,
+      isString: isString,
+      isNumber: isNumber,
+      isBoolean: isBoolean
     },
-    debugmessages:debugmessages,
-    setlogprefix:setlogprefix,
-    version:version,
-    IDVget:IDVget,
-    IDVglobalQuery:IDVglobalQuery
+    debugmessages: debugmessages,
+    setlogprefix: setlogprefix,
+    version: version,
+    IDVget: IDVget,
+    IDVglobalQuery: IDVglobalQuery
   };
 
   /**
@@ -53,7 +54,7 @@ var PRD = (function IIFE( logprefix, verbosemsg ) {
    * @since 1.0.0
    */
 
-    /**
+  /**
    * Proxy for the actual JSON object used in browsers (JSON) or workflow engine (ScriptVault.JSON).<br/>
    * Wraps the parse() and stringify() calls in try/catch blocks to report errors via logerror() instead of
    * letting the workflow engine break its regular flow when an error occurs.
@@ -74,9 +75,9 @@ var PRD = (function IIFE( logprefix, verbosemsg ) {
    * Not needed when code is running on the workflow engine.
    */
   var IDMAPPS = {
-    field:null,
-    form:null,
-    IDVault:null
+    field: null,
+    form: null,
+    IDVault: null
   };
 
   /**
@@ -88,23 +89,23 @@ var PRD = (function IIFE( logprefix, verbosemsg ) {
   var JSONptr; // JSON internal pointer. If we evaluate it inside a function that function can cause form to fail to load.
   var prefix; // prefix variable used by the logerror() calls.
   var debug; // When set, functions will provide more verbose log messages
-  if ( where === 'engine' ) {
+  if (where === 'engine') {
     JString = java.lang.String;
     JSONptr = ScriptVault.JSON;
   }
-  if ( where === 'form' ) {
+  if (where === 'form') {
     JSONptr = JSON;
   }
   // Initializes debug mode from library's parameter.
-  debugmessages( verbosemsg );
+  debugmessages(verbosemsg);
   // Initializes the prefix variable used by the logerror() calls.
-  setlogprefix( logprefix );
+  setlogprefix(logprefix);
 
   // From https://github.com/h5bp/html5-boilerplate/blob/master/src/js/plugins.js ,
   // implemented after errors occured on certain IE browser tests on logerror() console.log() calls.
-  if ( where === 'form' ) {
+  if (where === 'form') {
     // Avoid `console` errors in browsers that lack a console.
-    (function() {
+    (function () {
       var method;
       var noop = function () {};
       var methods = [
@@ -137,8 +138,8 @@ var PRD = (function IIFE( logprefix, verbosemsg ) {
    *
    * @param {string} str  String that will be appended to any logerror() call.
    */
-  function setlogprefix( str ) {
-    prefix = coerceToString( str, '' );
+  function setlogprefix(str) {
+    prefix = coerceToString(str, '');
   }
 
   /**
@@ -149,11 +150,11 @@ var PRD = (function IIFE( logprefix, verbosemsg ) {
    *
    * @param {boolean} bool  true to set the library to debug mode, false to disable debug more.
    */
-  function debugmessages( bool ) {
-    if ( bool === true ) {
+  function debugmessages(bool) {
+    if (bool === true) {
       debug = true;
     }
-    if ( bool === false ) {
+    if (bool === false) {
       debug = false;
     }
   }
@@ -169,15 +170,15 @@ var PRD = (function IIFE( logprefix, verbosemsg ) {
    */
   function formOrEngine() {
     var res = 'Detection failed';
-    if ( typeof window === 'object' &&
+    if (typeof window === 'object' &&
       'document' in window &&
       typeof java === 'undefined'
     ) {
       res = 'form';
     }
-    if ( typeof java === 'object' &&
-          'lang' in java &&
-          'String' in java.lang &&
+    if (typeof java === 'object' &&
+      'lang' in java &&
+      'String' in java.lang &&
       typeof window === 'undefined'
     ) {
       res = 'engine';
@@ -198,28 +199,28 @@ var PRD = (function IIFE( logprefix, verbosemsg ) {
    * @type {boolean}
    * @return {boolean} true if the message was returned successfully, false otherwise.
    */
-  function logerror( msg ) {
+  function logerror(msg) {
     var requestID, prepend;
     // Coercing log message via String() to avoid null and undefined results being passed to the log mechanism.
-    msg = String( msg );
+    msg = String(msg);
     // Coercing log prefix internal variable via String() to avoid null and undefined results being passed to the log mechanism.
-    prepend = String( prefix );
+    prepend = String(prefix);
     // Using try/catch makes the call safer, it also impacts performance.
-    if ( where === 'engine' ) {
+    if (where === 'engine') {
       // process.getRequestId() may fail if called during Global Script initialization.
       try {
         requestID = process.getRequestId();
         requestID += ': ';
-      } catch(e) {}
+      } catch (e) {}
     }
     try {
-      if ( where === 'form' ) {
-        console.log( prepend + msg );
+      if (where === 'form') {
+        console.log(prepend + msg);
       }
-      if ( where === 'engine' ) {
-        java.lang.System.out.println( prepend + requestID + msg );
+      if (where === 'engine') {
+        java.lang.System.out.println(prepend + requestID + msg);
       }
-    } catch ( e ) {
+    } catch (e) {
       // discarding error, since this is an error about printing the error message...
       return false;
     }
@@ -233,9 +234,9 @@ var PRD = (function IIFE( logprefix, verbosemsg ) {
    * @private
    * @param {string}  str   String input.
    */
-  function debugmsg( str ) {
-    if ( debug ) {
-      logerror( str );
+  function debugmsg(str) {
+    if (debug) {
+      logerror(str);
     }
   }
 
@@ -253,56 +254,56 @@ var PRD = (function IIFE( logprefix, verbosemsg ) {
    * @type {string}
    * @return {string} analysis result
    */
-  function inspectType( input ) {
+  function inspectType(input) {
     var res = '';
     // See:
     // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures
     // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/typeof
     // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/instanceof
     // ECMA null
-    if ( input === null ) {
+    if (input === null) {
       res = 'null';
     }
     // ECMA undefined
-    if ( typeof input === 'undefined' ) {
+    if (typeof input === 'undefined') {
       res = 'undefined';
     }
     // ECMA symbol (ES6 onwards)
-    if ( typeof input === 'symbol' ) {
+    if (typeof input === 'symbol') {
       res = 'symbol';
     }
     // ECMA string. typeof won't capture the case where a string was created via New String(), so need instanceof too
-    if ( typeof input === 'string' || ( typeof input === 'object' && input instanceof String ) ) {
+    if (typeof input === 'string' || (typeof input === 'object' && input instanceof String)) {
       res = 'string';
     }
     // ECMA number. typeof won't capture the case where a number was created via New Number(), so need instanceof too
-    if ( typeof input === 'number' || ( typeof input === 'object' && input instanceof Number ) ) {
+    if (typeof input === 'number' || (typeof input === 'object' && input instanceof Number)) {
       res = 'number';
     }
     // ECMA boolean. typeof won't capture the case where a string was created via New Boolean(), so need instanceof too
-    if ( typeof input === 'boolean' || ( typeof input === 'object' && input instanceof Boolean ) ) {
+    if (typeof input === 'boolean' || (typeof input === 'object' && input instanceof Boolean)) {
       res = 'boolean';
     }
     // ECMA functionn. Some posts report typeof not returning 'function' on certain environments so checking via instanceof as a fallback
-    if ( typeof input === 'function' || ( typeof input === 'object' && input instanceof Function ) ) {
+    if (typeof input === 'function' || (typeof input === 'object' && input instanceof Function)) {
       res = 'function';
     }
-    if ( res === '' && typeof input === 'object' ) {
-      if ( input instanceof Array ) { // ECMA Array
+    if (res === '' && typeof input === 'object') {
+      if (input instanceof Array) { // ECMA Array
         res = 'array';
-      } else if ( input instanceof RegExp ) { // ECMA regular expression
+      } else if (input instanceof RegExp) { // ECMA regular expression
         res = 'regexp';
-      } else if ( input instanceof Date ) { // ECMA date object
+      } else if (input instanceof Date) { // ECMA date object
         res = 'date';
-      } else if ( input instanceof Error ) { // ECMA error object
+      } else if (input instanceof Error) { // ECMA error object
         res = 'error';
-      } else if ( 'getClass' in input ) { // Java class
+      } else if ('getClass' in input) { // Java class
         res = input.getClass();
       } else { // ECMA fallback to get the object's constructor name. adding .slice( 8, -1 ) would remove the [ object ] portion of the string.
-        res = Object.prototype.toString.call( input );
+        res = Object.prototype.toString.call(input);
       }
     }
-    debugmsg( res );
+    debugmsg(res);
     return res;
   }
 
@@ -317,8 +318,8 @@ var PRD = (function IIFE( logprefix, verbosemsg ) {
    * @type {boolean}
    * @return {boolean} true if string, false otherwise
    */
-  function isString( input ) {
-    return ( typeof input === 'string' || ( typeof input === 'object' && input instanceof String ) );
+  function isString(input) {
+    return (typeof input === 'string' || (typeof input === 'object' && input instanceof String));
   }
 
   /**
@@ -332,8 +333,8 @@ var PRD = (function IIFE( logprefix, verbosemsg ) {
    * @type {boolean}
    * @return {boolean} true if number, false otherwise
    */
-  function isNumber( input ) {
-    return ( typeof input === 'number' || ( typeof input === 'object' && input instanceof Number ) );
+  function isNumber(input) {
+    return (typeof input === 'number' || (typeof input === 'object' && input instanceof Number));
   }
 
   /**
@@ -347,8 +348,8 @@ var PRD = (function IIFE( logprefix, verbosemsg ) {
    * @type {boolean}
    * @return {boolean} true if boolean, false otherwise
    */
-  function isBoolean( input ) {
-    return ( typeof input === 'boolean' || ( typeof input === 'object' && input instanceof Boolean ) );
+  function isBoolean(input) {
+    return (typeof input === 'boolean' || (typeof input === 'object' && input instanceof Boolean));
   }
 
   /**
@@ -362,11 +363,11 @@ var PRD = (function IIFE( logprefix, verbosemsg ) {
    * @type {boolean}
    * @return {boolean} true if Java Vector, false otherwise
    */
-  function isJavaVector( input ) {
-    return ( input != null && typeof input === 'object' && 'getClass' in input && input.getClass() == 'class java.util.Vector' );
+  function isJavaVector(input) {
+    return (input != null && typeof input === 'object' && 'getClass' in input && input.getClass() == 'class java.util.Vector');
   }
 
-   /**
+  /**
    * (Form only) Initializes references to the RBPM/IDMAPPS framework objects and save the same in the internal storage.<br/>
    * Uses IDVault internally on IDVget(), IDVglobalQuery(), GCVget(), getNamedPassword().<br/>
    * Exports field as PRD.web.field and form as PRD.web.form for usage inside global scripts.<br/>
@@ -381,44 +382,44 @@ var PRD = (function IIFE( logprefix, verbosemsg ) {
    * @param {object=}  [obj2]    One of the three IDMAPPS framework object
    * @param {object=}  [obj3]    One of the three IDMAPPS framework object
    */
-  function formInit( obj1, obj2, obj3 ) {
+  function formInit(obj1, obj2, obj3) {
     // Only appends the parameters passed so that we can check for the link's existence
     // before using it in the functions that require the User App/RBPM/IDMAPPS framework
     var fname, i, input = [];
     fname = 'PRD.init(): ';
-    if ( obj1 != null ) {
-      input.push( obj1 );
+    if (obj1 != null) {
+      input.push(obj1);
     } else {
-      logerror( fname + 'requires at least one parameter.' );
+      logerror(fname + 'requires at least one parameter.');
     }
-    if ( obj2 != null ) {
-      input.push( obj2 );
+    if (obj2 != null) {
+      input.push(obj2);
     }
-    if ( obj3 != null ) {
-      input.push( obj3 );
+    if (obj3 != null) {
+      input.push(obj3);
     }
     // Parse input parameters and setup the IDMAPPS internal variable
-    for ( i = 0; i < input.length; i++ ) {
-      if ( isField( input[ i ] ) && IDMAPPS.field === null ) {
-        logerror( fname + 'setting up internal reference to field.' );
-        IDMAPPS.field = input[ i ];
-        if ( 'web' in PublicAPI ) {
-          PublicAPI.web.field = input[ i ];
+    for (i = 0; i < input.length; i++) {
+      if (isField(input[i]) && IDMAPPS.field === null) {
+        logerror(fname + 'setting up internal reference to field.');
+        IDMAPPS.field = input[i];
+        if ('web' in PublicAPI) {
+          PublicAPI.web.field = input[i];
         }
-      } else if ( isForm( input[ i ] ) && IDMAPPS.form === null ) {
-        logerror( fname + 'setting up internal reference to form.' );
-        IDMAPPS.form = input[ i ];
-        if ( 'web' in PublicAPI ) {
-          PublicAPI.web.form = input[ i ];
+      } else if (isForm(input[i]) && IDMAPPS.form === null) {
+        logerror(fname + 'setting up internal reference to form.');
+        IDMAPPS.form = input[i];
+        if ('web' in PublicAPI) {
+          PublicAPI.web.form = input[i];
         }
-      } else if ( isIDVault( input[ i ] ) && IDMAPPS.IDVault === null ) {
-        logerror( fname + 'setting up internal reference to IDVault.' );
-        IDMAPPS.IDVault = input[ i ];
-        if ( 'web' in PublicAPI ) {
-          PublicAPI.web.IDVault = input[ i ];
+      } else if (isIDVault(input[i]) && IDMAPPS.IDVault === null) {
+        logerror(fname + 'setting up internal reference to IDVault.');
+        IDMAPPS.IDVault = input[i];
+        if ('web' in PublicAPI) {
+          PublicAPI.web.IDVault = input[i];
         }
       } else {
-        logerror( fname + 'Parameter obj' + (i+1) + ' is not one of the 3 expected framework objects, skipping it.' );
+        logerror(fname + 'Parameter obj' + (i + 1) + ' is not one of the 3 expected framework objects, skipping it.');
       }
     }
   }
@@ -432,17 +433,17 @@ var PRD = (function IIFE( logprefix, verbosemsg ) {
    * @type {boolean}
    * @return {boolean} true if the obj has all functions listed, false otherwise.
    */
-  function objectHasFunctions( obj, list ) {
+  function objectHasFunctions(obj, list) {
     var fname, i;
     fname = 'objectHasFunctions(): ';
-    if ( obj === null || typeof obj !== 'object' || (! (list instanceof Array) ) || list.length === 0 ) {
-      debugmsg( fname + 'Please review your input parameters.');
+    if (obj === null || typeof obj !== 'object' || (!(list instanceof Array)) || list.length === 0) {
+      debugmsg(fname + 'Please review your input parameters.');
       return false;
     }
-    for ( i = 0; i < list.length; i ++) {
-      if ( ! obj.hasOwnProperty( list[ i ] ) ) {
+    for (i = 0; i < list.length; i++) {
+      if (!obj.hasOwnProperty(list[i])) {
         return false;
-      } else if ( typeof obj[ list[ i ] ] !== 'function' ) {
+      } else if (typeof obj[list[i]] !== 'function') {
         return false;
       }
     }
@@ -457,14 +458,14 @@ var PRD = (function IIFE( logprefix, verbosemsg ) {
    * @type {boolean}
    * @return {boolean} true if the input is IDMAPPS framework field object, false otherwise.
    */
-  function isField( obj ) {
+  function isField(obj) {
     var properties;
     // Properties obtained from IDM 4.5 Object.keys( field ) executed on a web browser
-    properties = [ 'getName', 'getLabel', 'validate', 'fireEvent', 'hide',
+    properties = ['getName', 'getLabel', 'validate', 'fireEvent', 'hide',
       'show', 'enable', 'disable', 'getValue', 'getValues', 'getAllValues',
       'setValues', 'focus', 'select', 'activate', 'setRequired'
     ];
-    return objectHasFunctions( obj, properties );
+    return objectHasFunctions(obj, properties);
   }
 
   /**
@@ -475,17 +476,17 @@ var PRD = (function IIFE( logprefix, verbosemsg ) {
    * @type {boolean}
    * @return {boolean} true if the input is IDMAPPS framework field object, false otherwise.
    */
-  function isForm( obj ) {
+  function isForm(obj) {
     var properties;
     // Properties obtained from IDM 4.5 Object.keys( form ) executed on a web browser
-    properties = [ 'getField', 'alert', 'showMsg', 'showWarning', 'showError',
+    properties = ['getField', 'alert', 'showMsg', 'showWarning', 'showError',
       'showFatal', 'validate', 'submit', 'getLabel', 'hide', 'show', 'enable',
       'disable', 'getValue', 'getValues', 'getAllValues', 'setValues', 'focus',
       'select', 'activate', 'setRequired', 'interceptAction', 'getLocale',
       'getDefaultLocale', 'getRBMessage', 'stringToDate', 'dateToString',
       'isValidDate', 'showDebugMsg', 'addCustomValidation', 'clearMessages'
     ];
-    return objectHasFunctions( obj, properties );
+    return objectHasFunctions(obj, properties);
   }
 
   /**
@@ -496,13 +497,13 @@ var PRD = (function IIFE( logprefix, verbosemsg ) {
    * @type {boolean}
    * @return {boolean} true if the input is IDMAPPS framework field object, false otherwise.
    */
-  function isIDVault( obj ) {
+  function isIDVault(obj) {
     var properties;
     // Properties obtained from IDM 4.5 Object.keys( IDvault ) executed on a web browser
-    properties = [ 'globalQuery', 'containers', 'get', 'globalList',
+    properties = ['globalQuery', 'containers', 'get', 'globalList',
       'getGuidFromDn', 'getDnFromGuid', 'execService'
     ];
-    return objectHasFunctions( obj, properties );
+    return objectHasFunctions(obj, properties);
   }
 
   /**
@@ -524,9 +525,9 @@ var PRD = (function IIFE( logprefix, verbosemsg ) {
    * @param {object}  event  event object as seen by the field's scope
    * @param {object}  field  field  object as seen by the field's scope
    */
-  function fieldVisibility( event, field ) {
-    var action = String( event.getCustomData() );
-    switch ( action.toLowerCase() ) {
+  function fieldVisibility(event, field) {
+    var action = String(event.getCustomData());
+    switch (action.toLowerCase()) {
       case 'show':
         field.show();
         break;
@@ -534,7 +535,7 @@ var PRD = (function IIFE( logprefix, verbosemsg ) {
         field.hide();
         break;
       default:
-      logerror( 'Field: ' + field.getLabel() + ', Event: ' + event.getEventName() + ', Invalid option received: ' + action );
+        logerror('Field: ' + field.getLabel() + ', Event: ' + event.getEventName() + ', Invalid option received: ' + action);
     }
   }
 
@@ -552,18 +553,18 @@ var PRD = (function IIFE( logprefix, verbosemsg ) {
    * @type {object}
    * @return {object} ECMA Object generated from the JSON string. On error return empty object and report the error via logerror()
    */
-  function JSONparse( s, r ) {
+  function JSONparse(s, r) {
     var fname, res, pointer;
     fname = 'JSONobj.parse(): ';
     // Setup a pointer to the JSON object since its name differs on forms and engine.
     pointer = JSONptr;
     try {
-      res = pointer.parse( s, r );
-    } catch( e ){
-      logerror( fname + e.message );
+      res = pointer.parse(s, r);
+    } catch (e) {
+      logerror(fname + e.message);
     }
-    if (! res ) {
-      debugmsg( fname + 'input processing resulted in a null value.' );
+    if (!res) {
+      debugmsg(fname + 'input processing resulted in a null value.');
       return {};
     }
     return res;
@@ -584,138 +585,138 @@ var PRD = (function IIFE( logprefix, verbosemsg ) {
    * @type {string}
    * @return {string} Serialized ECMA object in JSON format. On error return empty string and report the error via logerror()
    */
-  function JSONstringify( o, r, s ) {
+  function JSONstringify(o, r, s) {
     var fname, res, pointer;
     fname = 'JSONobj.stringify(): ';
     // Setup a pointer to the JSON object since its name differs on forms and engine.
     pointer = JSONptr;
     try {
-      res = pointer.stringify( o, r, s );
-    } catch( e ){
-      logerror( fname + e.message );
+      res = pointer.stringify(o, r, s);
+    } catch (e) {
+      logerror(fname + e.message);
     }
-    if (! res ) {
-      debugmsg( fname + 'input processing resulted in a null value.' );
+    if (!res) {
+      debugmsg(fname + 'input processing resulted in a null value.');
       return '';
     }
     return res;
   }
 
   /**
- * Verify if an ECMA object has the selected location.<br/>
- * Note: To reference properties with a dot in their name use the format ["property.name"] .<br/>
- *
- * Ported from IDM engine to RBPM. IDM Engine version at https://github.com/fchierad/IDM-ECMAlib/blob/v1.0.2/JSONlib-JS.js
- *
- * @function test
- * @memberof PRD.util.JSONobj
- * @since 1.0.3
- *
- * @param {(object|string)}  inputJSON    Input JSON (ECMA object). If a string-serialized JSON is provided it will be converted to a JSON object internally
- * @param {string}           whattotest   Dot-separated list of properties as if you are accessing them via ECMAscript
- *
- * @return {boolean} true if the path is found, false otherwise
- */
-function JSONtest( inputJSON, whattotest ) {
-  var fname, i, itval, itobj, obj, getArr, propName;
-  fname = 'JSONobj.test(): ';
-  // Review input data
-  if ( isString( inputJSON ) ) {
-    obj = JSONparse( inputJSON );
-  } else if ( inputJSON && typeof inputJSON === 'object' ) {
-    obj = inputJSON;
-  } else {
-    logerror( fname + 'parameter inputJSON need to be a string representation of a JSON object or the JSON object itself.' );
-    return false;
-  }
-  if ( isString( whattotest ) ) {
-    getArr = charArrToPropertyNames( stringToCharArray( whattotest ) );
-  } else {
-    logerror( fname + 'parameter whattotest should be a string value.' );
-    return false;
-  }
-  // Iterates through the object using itobj and itval as the middle steps to find the desired result
-  itobj = obj;
-  for ( i = 0; i < getArr.length; i++ ) {
-    propName = getArr[ i ];
-    debugmsg( fname + 'Parsing: "' + propName + '", type: ' + typeof propName );
-    if ( typeof itobj === 'object' && propName in itobj ) {
-      itval = itobj[ propName ];
+   * Verify if an ECMA object has the selected location.<br/>
+   * Note: To reference properties with a dot in their name use the format ["property.name"] .<br/>
+   *
+   * Ported from IDM engine to RBPM. IDM Engine version at https://github.com/fchierad/IDM-ECMAlib/blob/v1.0.2/JSONlib-JS.js
+   *
+   * @function test
+   * @memberof PRD.util.JSONobj
+   * @since 1.0.3
+   *
+   * @param {(object|string)}  inputJSON    Input JSON (ECMA object). If a string-serialized JSON is provided it will be converted to a JSON object internally
+   * @param {string}           whattotest   Dot-separated list of properties as if you are accessing them via ECMAscript
+   *
+   * @return {boolean} true if the path is found, false otherwise
+   */
+  function JSONtest(inputJSON, whattotest) {
+    var fname, i, itval, itobj, obj, getArr, propName;
+    fname = 'JSONobj.test(): ';
+    // Review input data
+    if (isString(inputJSON)) {
+      obj = JSONparse(inputJSON);
+    } else if (inputJSON && typeof inputJSON === 'object') {
+      obj = inputJSON;
     } else {
-      debugmsg( fname + 'parsing ' + whattotest + ', could not find property "' + propName + '" in the current object location.' );
+      logerror(fname + 'parameter inputJSON need to be a string representation of a JSON object or the JSON object itself.');
       return false;
     }
-    itobj = itval;
-  }
-  return true;
-}
-
-/**
- * Retrieves a property of an ECMA object (or its subordinate object) and returns it in the specified type.<br/>
- * Note: To reference properties with a dot in their name use the format ["property.name"] .<br/>
- *
- * Ported from IDM engine to RBPM. IDM Engine version at https://github.com/fchierad/IDM-ECMAlib/blob/v1.0.2/JSONlib-JS.js
- *
- * @function get
- * @memberof PRD.util.JSONobj
- * @since 1.0.3
- *
- * @param {(object|string)}  inputJSON     Input JSON (ECMA object). If a string-serialized JSON is provided it will be converted to a JSON object internally
- * @param {string}           whattoget     Dot-separated list of properties as if you are accessing them via ECMAscript
- * @param {string=}          [returntype]  (Optional) Desired return type. Valid values are: string, number, raw. Defaults to raw in case whatever is provided is not one of the 3 valid options
- *
- * @return {(string|number|boolean|object)} Selected property's value in the selected format. If parsing of the object fails returns an empty string
- */
-function JSONget( inputJSON, whattoget, returntype ) {
-  var fname, i, itval, itobj, obj, getArr, propName, res = '';
-  fname = 'JSONobj.get(): ';
-  // Review input data
-  if ( isString( inputJSON ) ) {
-    obj = JSONparse( inputJSON );
-  } else if ( inputJSON && typeof inputJSON === 'object' ) {
-    obj = inputJSON;
-  } else {
-    logerror( fname + 'parameter inputJSON need to be a string representation of a JSON object or the JSON object itself.' );
-    return res;
-  }
-  if ( isString( whattoget ) ) {
-    getArr = charArrToPropertyNames( stringToCharArray( whattoget ) );
-  } else {
-    logerror( fname + 'parameter whattotest should be a string value.' );
-    return res;
-  }
-  if ( returntype !== 'string' && returntype !== 'number' && returntype !== 'raw' ) {
-      returntype = 'raw';
-  }
-  // Iterates through the object using itobj and itval as the middle steps to find the desired result
-  itobj = obj;
-  for ( i = 0; i < getArr.length; i++ ) {
-    propName = getArr[ i ];
-    debugmsg( fname + 'Parsing: "' + propName + '", type: ' + typeof propName );
-    if ( typeof itobj === 'object' && propName in itobj ) {
-      itval = itobj[ propName ];
+    if (isString(whattotest)) {
+      getArr = charArrToPropertyNames(stringToCharArray(whattotest));
     } else {
-      logerror( fname + 'parsing ' + whattoget + ', could not find property "' + propName + '" in the current object location.' );
+      logerror(fname + 'parameter whattotest should be a string value.');
+      return false;
+    }
+    // Iterates through the object using itobj and itval as the middle steps to find the desired result
+    itobj = obj;
+    for (i = 0; i < getArr.length; i++) {
+      propName = getArr[i];
+      debugmsg(fname + 'Parsing: "' + propName + '", type: ' + typeof propName);
+      if (typeof itobj === 'object' && propName in itobj) {
+        itval = itobj[propName];
+      } else {
+        debugmsg(fname + 'parsing ' + whattotest + ', could not find property "' + propName + '" in the current object location.');
+        return false;
+      }
+      itobj = itval;
+    }
+    return true;
+  }
+
+  /**
+   * Retrieves a property of an ECMA object (or its subordinate object) and returns it in the specified type.<br/>
+   * Note: To reference properties with a dot in their name use the format ["property.name"] .<br/>
+   *
+   * Ported from IDM engine to RBPM. IDM Engine version at https://github.com/fchierad/IDM-ECMAlib/blob/v1.0.2/JSONlib-JS.js
+   *
+   * @function get
+   * @memberof PRD.util.JSONobj
+   * @since 1.0.3
+   *
+   * @param {(object|string)}  inputJSON     Input JSON (ECMA object). If a string-serialized JSON is provided it will be converted to a JSON object internally
+   * @param {string}           whattoget     Dot-separated list of properties as if you are accessing them via ECMAscript
+   * @param {string=}          [returntype]  (Optional) Desired return type. Valid values are: string, number, raw. Defaults to raw in case whatever is provided is not one of the 3 valid options
+   *
+   * @return {(string|number|boolean|object)} Selected property's value in the selected format. If parsing of the object fails returns an empty string
+   */
+  function JSONget(inputJSON, whattoget, returntype) {
+    var fname, i, itval, itobj, obj, getArr, propName, res = '';
+    fname = 'JSONobj.get(): ';
+    // Review input data
+    if (isString(inputJSON)) {
+      obj = JSONparse(inputJSON);
+    } else if (inputJSON && typeof inputJSON === 'object') {
+      obj = inputJSON;
+    } else {
+      logerror(fname + 'parameter inputJSON need to be a string representation of a JSON object or the JSON object itself.');
       return res;
     }
-    itobj = itval;
+    if (isString(whattoget)) {
+      getArr = charArrToPropertyNames(stringToCharArray(whattoget));
+    } else {
+      logerror(fname + 'parameter whattotest should be a string value.');
+      return res;
+    }
+    if (returntype !== 'string' && returntype !== 'number' && returntype !== 'raw') {
+      returntype = 'raw';
+    }
+    // Iterates through the object using itobj and itval as the middle steps to find the desired result
+    itobj = obj;
+    for (i = 0; i < getArr.length; i++) {
+      propName = getArr[i];
+      debugmsg(fname + 'Parsing: "' + propName + '", type: ' + typeof propName);
+      if (typeof itobj === 'object' && propName in itobj) {
+        itval = itobj[propName];
+      } else {
+        logerror(fname + 'parsing ' + whattoget + ', could not find property "' + propName + '" in the current object location.');
+        return res;
+      }
+      itobj = itval;
+    }
+    // Inspect returned data and coerce it as needed. No default set since res is set at the start of the function
+    switch (returntype) {
+      case 'string':
+        res = String(itval);
+        break;
+      case 'number':
+        res = Number(itval);
+        break;
+      case 'raw':
+        res = itval;
+        break;
+    }
+    return res;
   }
-  // Inspect returned data and coerce it as needed. No default set since res is set at the start of the function
-  switch ( returntype ) {
-    case 'string':
-      res = String( itval );
-      break;
-    case 'number':
-      res = Number( itval );
-      break;
-    case 'raw':
-      res = itval;
-      break;
-  }
-  return res;
-}
 
-//  https://github.com/fchierad/IDM-ECMAlib/blob/v1.0.2/JSONlib-JS.md#JSONget
+  //  https://github.com/fchierad/IDM-ECMAlib/blob/v1.0.2/JSONlib-JS.md#JSONget
 
   /**
    * Unicode-safe split of a string to a character Array.<br/>
@@ -731,13 +732,14 @@ function JSONget( inputJSON, whattoget, returntype ) {
    * @type {string[]}
    * @return {string[]} Unicode-safe character array
    */
-  function stringToCharArray( str ) {
-    var cArr = [], fname;
+  function stringToCharArray(str) {
+    var cArr = [],
+      fname;
     fname = 'stringToCharArray(): ';
     try {
-      cArr = String( str ).split( /(?=(?:[\0-\t\x0B\f\x0E-\u2027\u202A-\uD7FF\uE000-\uFFFF]|[\uD800-\uDBFF][\uDC00-\uDFFF]|[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?:[^\uD800-\uDBFF]|^)[\uDC00-\uDFFF]))/ );
-    } catch( e ) {
-      logerror( fname + 'Failed to split the input string, error: ' + e.message );
+      cArr = String(str).split(/(?=(?:[\0-\t\x0B\f\x0E-\u2027\u202A-\uD7FF\uE000-\uFFFF]|[\uD800-\uDBFF][\uDC00-\uDFFF]|[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?:[^\uD800-\uDBFF]|^)[\uDC00-\uDFFF]))/);
+    } catch (e) {
+      logerror(fname + 'Failed to split the input string, error: ' + e.message);
     }
     return cArr;
   }
@@ -755,11 +757,11 @@ function JSONget( inputJSON, whattoget, returntype ) {
    * @type {Array<(string|number)>}
    * @return {Array<(string|number)>} property names array
    */
-  function charArrToPropertyNames( cArr ) {
+  function charArrToPropertyNames(cArr) {
     var i, fname, currentName, squaremark, re_whitespace, re_number, re_quotes, property = [];
     fname = 'charArrToPropertyNames(): ';
-    if ( !( cArr instanceof Array ) ) {
-      logerror( fname + 'Input parameter is not an Array, aborting.' );
+    if (!(cArr instanceof Array)) {
+      logerror(fname + 'Input parameter is not an Array, aborting.');
       return property;
     }
     // Setup for parsing. Delimiter for property names are either dot or open and close square brackets
@@ -767,48 +769,48 @@ function JSONget( inputJSON, whattoget, returntype ) {
     currentName = '';
     re_number = /^\d+$/;
     re_quotes = /^(['"])(.+)\1$/;
-    squaremark = ( cArr[ 0 ] === '[' )? 'first':'end'; //squaremark can be 'first', 'start', 'end'
+    squaremark = (cArr[0] === '[') ? 'first' : 'end'; //squaremark can be 'first', 'start', 'end'
     // Iterates through the character array parsing elements into their own property array entry
-    for ( i=0; i < cArr.length; i++ ) {
-      if ( squaremark === 'first' && cArr[ i ] === '[' ) {
+    for (i = 0; i < cArr.length; i++) {
+      if (squaremark === 'first' && cArr[i] === '[') {
         squaremark = 'start';
         continue;
       }
-      if ( squaremark === 'end' && cArr[ i ] === '[' ) {
+      if (squaremark === 'end' && cArr[i] === '[') {
         squaremark = 'start';
-        if ( currentName.trim() !== '' ) { // prevent double push on constructs like arr[0][0]
-          property.push( currentName.trim() );
+        if (currentName.trim() !== '') { // prevent double push on constructs like arr[0][0]
+          property.push(currentName.trim());
         }
         currentName = '';
         continue;
       }
-      if ( squaremark === 'start' && cArr[ i ] === ']' ) {
+      if (squaremark === 'start' && cArr[i] === ']') {
         squaremark = 'end';
         currentName = currentName.trim();
         // If the property name between [] is a pure number, coerces the string to a number
-        if ( re_number.test( currentName ) ) {
-          currentName = Number( currentName );
+        if (re_number.test(currentName)) {
+          currentName = Number(currentName);
         }
         // Remove quotes around property name if they are present like obj["property name"], returning property name
-        if ( re_quotes.test( currentName ) ) {
-          currentName = re_quotes.exec( currentName )[2];
+        if (re_quotes.test(currentName)) {
+          currentName = re_quotes.exec(currentName)[2];
         }
-        property.push( currentName );
+        property.push(currentName);
         currentName = '';
         continue;
       }
       // Traditional . delimiter
-      if ( squaremark === 'end' && cArr[ i ] === '.' ) {
-        if ( currentName.trim() !== '' ) { // prevent double push on constructs like arr[0].name
-          property.push( currentName.trim() );
+      if (squaremark === 'end' && cArr[i] === '.') {
+        if (currentName.trim() !== '') { // prevent double push on constructs like arr[0].name
+          property.push(currentName.trim());
         }
         currentName = '';
         continue;
       }
-      currentName += cArr[ i ];
+      currentName += cArr[i];
     }
-    if ( currentName !== '' ) {
-      property.push( currentName.trim() );
+    if (currentName !== '') {
+      property.push(currentName.trim());
     }
     return property;
   }
@@ -832,26 +834,27 @@ function JSONget( inputJSON, whattoget, returntype ) {
    * @type {string}
    * @return {string} resulting string.
    */
-  function coerceToString( input, defVal ) {
-    var ret = '', str;
+  function coerceToString(input, defVal) {
+    var ret = '',
+      str;
     /* Throughout this function String() is used to guarantee that the string generated
      * is an ECMA string. This is only a concern on the workflow engine since the engine
      * allows a mix of ECMA and Java code. Returning a Java string will cause the
      * toJSON() function to fail when using JSON.stringify(), hence this safety.
      */
-    if ( defVal != null && isString( defVal ) ) {
-      ret = String( defVal );
+    if (defVal != null && isString(defVal)) {
+      ret = String(defVal);
     }
-    if ( input === null || input === undefined ) {
+    if (input === null || input === undefined) {
       return ret;
     }
-    if ( isString( input ) || isNumber( input ) || isBoolean( input ) ) {
-      str = String( input );
+    if (isString(input) || isNumber(input) || isBoolean(input)) {
+      str = String(input);
     }
-    if ( input instanceof Array ) {
-      str = String( input.join( ' ' ) );
+    if (input instanceof Array) {
+      str = String(input.join(' '));
     }
-    if ( str !== '' ) {
+    if (str !== '') {
       ret = str;
     }
     return ret;
@@ -869,20 +872,20 @@ function JSONget( inputJSON, whattoget, returntype ) {
    * @type {string}
    * @return {string} HTTP Basic 'Authorization' header's value.
    */
-  function basicHTTPauthHeader( username, password ) {
+  function basicHTTPauthHeader(username, password) {
     var fname, res, conc, Base64, b64str;
     fname = 'basicHTTPauthHeader(): ';
-    if ( username == null || password == null ) {
-      logerror( fname + 'username and password must be provided and not null nor undefined.' );
+    if (username == null || password == null) {
+      logerror(fname + 'username and password must be provided and not null nor undefined.');
       return '';
     }
     try {
       Base64 = new Packages.org.apache.commons.codec.binary.Base64();
-      conc = JString( username + ':' + password ).getBytes( 'UTF-8' );
-      b64str = JString( Base64.encodeBase64( conc ), 'UTF-8' );
+      conc = JString(username + ':' + password).getBytes('UTF-8');
+      b64str = JString(Base64.encodeBase64(conc), 'UTF-8');
       res = 'Basic ' + b64str;
-    } catch( e ) {
-      logerror( fname + 'Failed to build Basic Authentication HTTP header value. Error: ' + e.message );
+    } catch (e) {
+      logerror(fname + 'Failed to build Basic Authentication HTTP header value. Error: ' + e.message);
     }
     return res;
   }
@@ -899,11 +902,11 @@ function JSONget( inputJSON, whattoget, returntype ) {
    * @type {boolean}
    * @return {boolean} true if maxretries is greater than current counter, false otherwise.
    */
-  function shouldRetry( curcounter, maxretries ) {
+  function shouldRetry(curcounter, maxretries) {
     var retry = false;
-    curcounter = String( curcounter ) | 0;
-    maxretries = String( maxretries ) | 0;
-    retry = ( curcounter < maxretries ) ? true : false;
+    curcounter = String(curcounter) | 0;
+    maxretries = String(maxretries) | 0;
+    retry = (curcounter < maxretries) ? true : false;
     return retry;
   }
 
@@ -923,74 +926,116 @@ function JSONget( inputJSON, whattoget, returntype ) {
    * @type {Array.<string[]>}
    * @return {Array.<string[]>} ECMA Array with 3 parts. [ [ elements only present on list1 ], [ elements only present on list2 ], [ elements present on both] ]
    */
-  function compare( list1, list2 ,ignorecase ) {
-    var exists1 = {}, exists2 = {}, onlyin1 = [], onlyin2 = [], isinboth = [], res,
-    i, curr, compare, fname, dedup1 = [];
-    fname = 'Unique(): ';
-    if ( list1 != null && typeof list1 === 'object' && list2 != null && typeof list2 === 'object' ) {
+  function compare(list1, list2, ignorecase) {
+    var exists1 = {},
+      exists2 = {},
+      onlyin1 = [],
+      onlyin2 = [],
+      isinboth = [],
+      res,
+      i, curr, compare, fname, dedup1 = [];
+    fname = 'Compare(): ';
+    if (list1 != null && typeof list1 === 'object' && list2 != null && typeof list2 === 'object') {
       // (Engine only) Convert Vector to Array so we can perform the comparisons.
-      if ( where === 'engine' ) {
-        if ( isJavaVector( list1 ) ) {
-          list1 = JavaVectorToECMAArray( list1 );
+      if (where === 'engine') {
+        if (isJavaVector(list1)) {
+          list1 = JavaVectorToECMAArray(list1);
         }
-        if ( isJavaVector( list2 ) ) {
-          list2 = JavaVectorToECMAArray( list2 );
+        if (isJavaVector(list2)) {
+          list2 = JavaVectorToECMAArray(list2);
         }
       }
       // Deduplicate lists, then compare them
-      if ( list1 instanceof Array && list2 instanceof Array ) {
+      if (list1 instanceof Array && list2 instanceof Array) {
         // generate hashmap for list1
-        for ( i = 0; i < list1.length; i++ ) {
+        for (i = 0; i < list1.length; i++) {
           // Using compare for case sensitive and insentive comparisson while keeping curr as the current value coerced to string
-          curr = String( list1[ i ] );
-          if ( ignorecase === true ) {
+          curr = String(list1[i]);
+          if (ignorecase === true) {
             compare = curr.toLowerCase();
           } else {
             compare = curr;
           }
-          if ( ! exists1.hasOwnProperty( compare ) ) {
-            dedup1.push( curr );
-            exists1[ compare ] = true; // marking the entry as already existing for deduplication purposes
+          if (!exists1.hasOwnProperty(compare)) {
+            dedup1.push(curr);
+            exists1[compare] = true; // marking the entry as already existing for deduplication purposes
           }
         }
         // Build onlyin2 and isinboth by iterating on list2, generating its hashmap while comparing with list1
-        for ( i = 0; i < list2.length; i++ ) {
+        for (i = 0; i < list2.length; i++) {
           // Using compare for case sensitive and insentive comparisson while keeping curr as the current value coerced to string
-          curr = String( list2[ i ] );
-          if ( ignorecase === true ) {
+          curr = String(list2[i]);
+          if (ignorecase === true) {
             compare = curr.toLowerCase();
           } else {
             compare = curr;
           }
-          if ( ! exists2.hasOwnProperty( compare ) ) {
-            exists2[ compare ] = true; // marking the entry as already existing for deduplication purposes
-            if ( exists1.hasOwnProperty( compare ) ) {
-              isinboth.push( curr );
+          if (!exists2.hasOwnProperty(compare)) {
+            exists2[compare] = true; // marking the entry as already existing for deduplication purposes
+            if (exists1.hasOwnProperty(compare)) {
+              isinboth.push(curr);
             } else {
-              onlyin2.push( curr );
+              onlyin2.push(curr);
             }
           }
         }
         // Iterate deduplicated list1 against list2's hashmap to populate onlyin2
-        for ( i = 0; i < dedup1.length; i++ ){
+        for (i = 0; i < dedup1.length; i++) {
           // Using compare for case sensitive and insentive comparisson while keeping curr as the current value coerced to string
-          curr = String( dedup1[ i ] );
-          if ( ignorecase === true ) {
+          curr = String(dedup1[i]);
+          if (ignorecase === true) {
             compare = curr.toLowerCase();
           } else {
             compare = curr;
           }
-          if ( ! exists2.hasOwnProperty( compare ) ) {
-            onlyin1.push( curr );
+          if (!exists2.hasOwnProperty(compare)) {
+            onlyin1.push(curr);
           }
         }
         // Convert results back to Vector if the obj passed in was a java.util.Vector
       }
     } else {
-      logerror( fname + 'Please review the parameters provided, aborting.' );
+      logerror(fname + 'Please review the parameters provided, aborting.');
     }
-    res = [ onlyin1, onlyin2, isinboth ];
+    res = [onlyin1, onlyin2, isinboth];
     return res;
+  }
+
+  /**
+   * (Form) Compares 2 or more unidimensional ECMA Arrays within an Array and returns an Array with intersecting results.
+   *
+   * @memberof PRD.util
+   * @since 1.0.6
+   *
+   * @param  {Array.<string[]>} arr        ECMA Array.
+   * @param  {boolean}                     ignorecase   Changes string comparison to case insensitive.
+   *                                                    This also causes the casing of the results will match the casing of their
+   *                                                    first time appearing in the list provided.
+   *
+   * @type {Array.<string[]>}
+   * @return {string[]} ECMA Array of intersecting results.
+   */
+  function intersectArrays(arr, ignoreBool) {
+    var result;
+    try {
+      if (arr.length === 0) {
+        return logerror("Must have array elements to compare");
+      }
+      if (arr.length === 1) {
+        return arr[0];
+      } else {
+        result = [null, null, arr[0]]
+        arr.forEach(function (key, ind) {
+          var next = ind + 1;
+          if (next < arr.length) {
+            result = PRD.util.compare(result[2], arr[next], ignoreBool);
+          }
+        });
+        return result[2];
+      }
+    } catch (e) {
+      return logerror(e + " Must submit array as parameter.");
+    }
   }
 
   /**
@@ -1008,35 +1053,37 @@ function JSONget( inputJSON, whattoget, returntype ) {
    * @type {(string[]|java.util.Vector)}
    * @return {(string[]|java.util.Vector)} ECMA Array or Java Vector. If obj is not a valid type returns empty ECMA Array.
    */
-  function unique( obj , ignorecase ) {
-    var exists = {}, res = [], convertToVector, i, curr, compare, fname;
+  function unique(obj, ignorecase) {
+    var exists = {},
+      res = [],
+      convertToVector, i, curr, compare, fname;
     fname = 'Unique(): ';
-    if ( obj != null && typeof obj === 'object' ) {
+    if (obj != null && typeof obj === 'object') {
       // Convert Vector to Array so we can deduplicate both using the same code
-      if ( where ==='engine' && isJavaVector( obj ) ) {
-        obj = JavaVectorToECMAArray( obj );
+      if (where === 'engine' && isJavaVector(obj)) {
+        obj = JavaVectorToECMAArray(obj);
         convertToVector = true;
       } else {
         convertToVector = false;
       }
       // Deduplicate array, generate
-      if ( obj instanceof Array ) {
-        for ( i = 0; i < obj.length; i++ ) {
+      if (obj instanceof Array) {
+        for (i = 0; i < obj.length; i++) {
           // Using compare for case sensitive and insentive comparisson while keeping curr as the current value coerced to string
-          curr = String( obj[ i ] );
-          if ( ignorecase === true ) {
+          curr = String(obj[i]);
+          if (ignorecase === true) {
             compare = curr.toLowerCase();
           } else {
             compare = curr;
           }
-          if ( ! exists.hasOwnProperty( compare ) ) {
-            res.push( curr );
-            exists[ compare ] = true; // marking the entry as already existing for deduplication purposes
+          if (!exists.hasOwnProperty(compare)) {
+            res.push(curr);
+            exists[compare] = true; // marking the entry as already existing for deduplication purposes
           }
         }
         // Convert results back to Vector if the obj passed in was a java.util.Vector
-        if ( where ==='engine' && convertToVector ) {
-          res = ECMAArrayToJavaVector( res );
+        if (where === 'engine' && convertToVector) {
+          res = ECMAArrayToJavaVector(res);
         }
       }
     }
@@ -1055,54 +1102,55 @@ function JSONget( inputJSON, whattoget, returntype ) {
    * @type {(array.<(object|string)>|null)}
    * @return {(array.<(object|string)>|null)} ECMA Array of objects and string. If error occur returns null.
    */
-  function getObject2arr( list, onelvl ) {
+  function getObject2arr(list, onelvl) {
     var res, fname, initialnode, currnode, nodename, childnodes, preprocess, removeobj;
     fname = 'getObject2arr(): ';
-    res = null; removeobj = true;
+    res = null;
+    removeobj = true;
 
-    if ( list === null || (!( typeof list === 'object' && list.getClass() == 'class java.util.ArrayList' )) ) {
-      logerror( fname + 'Invalid parameter received. list must be the result of a flowdata.getObject() call.' );
+    if (list === null || (!(typeof list === 'object' && list.getClass() == 'class java.util.ArrayList'))) {
+      logerror(fname + 'Invalid parameter received. list must be the result of a flowdata.getObject() call.');
       return res;
     }
     // Retrieves the first ElementNSImpl node from the list
-    if ( list.size() > 0 ) {
+    if (list.size() > 0) {
       initialnode = list.get(0);
     }
 
     // Iterate through the nodes, group element child nodes into arrays as per their content.
-    if ( initialnode != null && typeof initialnode === 'object' && initialnode.getClass() == 'class org.apache.xerces.dom.ElementNSImpl' ) {
+    if (initialnode != null && typeof initialnode === 'object' && initialnode.getClass() == 'class org.apache.xerces.dom.ElementNSImpl') {
       currnode = initialnode;
-      res = [ {} ];
+      res = [{}];
       preprocess = {};
-      while ( currnode ) {
+      while (currnode) {
         // Text nodes are appended as is to the current level
-        if ( currnode.getNodeType() == getNodeTypes.nodetype.Text ) {
-          if ( shouldProcessNode( currnode ) ) {
-            debugmsg( fname + 'found text node. getNodeValue(): "' + currnode.getNodeValue() + '"' );
-            res.push( String( currnode.getNodeValue() ) );
+        if (currnode.getNodeType() == getNodeTypes.nodetype.Text) {
+          if (shouldProcessNode(currnode)) {
+            debugmsg(fname + 'found text node. getNodeValue(): "' + currnode.getNodeValue() + '"');
+            res.push(String(currnode.getNodeValue()));
           }
         }
         // Element nodes require grouping for deduplication since we can have 2 sibling elements with the same node name
-        if ( currnode.getNodeType() == getNodeTypes.nodetype.Element ) {
+        if (currnode.getNodeType() == getNodeTypes.nodetype.Element) {
           // Deduplication of node names
-          nodename = String( currnode.getNodeName() );
-          debugmsg( fname + 'found element node "' + nodename + '"' );
-          if ( ! preprocess.hasOwnProperty( nodename ) ) {
-            preprocess[ nodename ] = [];
+          nodename = String(currnode.getNodeName());
+          debugmsg(fname + 'found element node "' + nodename + '"');
+          if (!preprocess.hasOwnProperty(nodename)) {
+            preprocess[nodename] = [];
           }
-          preprocess[ nodename ].push( currnode );
+          preprocess[nodename].push(currnode);
           removeobj = false;
         }
         currnode = currnode.getNextSibling();
       }
 
       // Iterates the properties and set them up using flowdata2obj
-      for ( nodename in preprocess ) {
-        res[ 0 ][ nodename ] = flowdata2obj( preprocess[ nodename ] );
+      for (nodename in preprocess) {
+        res[0][nodename] = flowdata2obj(preprocess[nodename]);
       }
 
-      if ( removeobj ) {
-        res = res.splice( 1 );
+      if (removeobj) {
+        res = res.splice(1);
       }
     }
 
@@ -1120,15 +1168,15 @@ function JSONget( inputJSON, whattoget, returntype ) {
    * @type {boolean}
    * @return {boolean} true if we should process the node, false otherwise.
    */
-  function shouldProcessNode( node ) {
-    if ( node === null ) {
+  function shouldProcessNode(node) {
+    if (node === null) {
       return false;
     }
-    if ( typeof node === 'object' && node.getNodeType() == getNodeTypes.nodetype.Element ) {
+    if (typeof node === 'object' && node.getNodeType() == getNodeTypes.nodetype.Element) {
       return true;
     }
-    if ( typeof node === 'object' && node.getNodeType() == getNodeTypes.nodetype.Text ) {
-      if ( node.getNodeValue().length === 1 && node.getNodeValue().charCodeAt( 0 ) === 10 ) {
+    if (typeof node === 'object' && node.getNodeType() == getNodeTypes.nodetype.Text) {
+      if (node.getNodeValue().length === 1 && node.getNodeValue().charCodeAt(0) === 10) {
         return false;
       } else {
         return true;
@@ -1145,40 +1193,42 @@ function JSONget( inputJSON, whattoget, returntype ) {
    * @type {array.<(object|string)>}
    * @return {array.<(object|string)>} ECMA Array of objects and strings.
    */
-  function flowdata2obj( node ) {
+  function flowdata2obj(node) {
     var fname, res, i, j, nodename, childnodes, childnode, iterate, removeobj;
     fname = 'flowdata2obj(): ';
-    res = [ '' ]; iterate = {}; removeobj = true;
+    res = [''];
+    iterate = {};
+    removeobj = true;
     // Array of nodes,  process their child nodes only and return array with 1 object and 1 or more text nodes
     // Iterate through the array of parent nodes that should have the same element name
-    if ( node instanceof Array ) {
-      debugmsg( fname + 'Received array for processing, length: ' + node.length );
-      res = [ {} ];
+    if (node instanceof Array) {
+      debugmsg(fname + 'Received array for processing, length: ' + node.length);
+      res = [{}];
       // Iterate through the parent nodes to collate child nodes with same element name
-      for ( i = 0; i < node.length; i++ ) {
-        if ( node[ i ].hasChildNodes() ) {
-          debugmsg( fname + 'node at position ' + i + ' has child nodes' );
-          childnodes = node[ i ].getChildNodes();
+      for (i = 0; i < node.length; i++) {
+        if (node[i].hasChildNodes()) {
+          debugmsg(fname + 'node at position ' + i + ' has child nodes');
+          childnodes = node[i].getChildNodes();
           // Iterates through child nodes of a single parent node
-          for ( j = 0; j < childnodes.getLength(); j++ ) {
-            debugmsg( fname + 'array index ' + i + ': processing child node ' + j );
-            childnode = childnodes.item( j );
+          for (j = 0; j < childnodes.getLength(); j++) {
+            debugmsg(fname + 'array index ' + i + ': processing child node ' + j);
+            childnode = childnodes.item(j);
             // Text nodes are appended as is to the current level
-            if ( childnode.getNodeType() == getNodeTypes.nodetype.Text ) {
-              if ( shouldProcessNode( childnode ) ) {
-                debugmsg( fname + 'Found text node. getNodeValue(): "' + childnode.getNodeValue() + '"' );
-                res.push( String( childnode.getNodeValue() ) );
+            if (childnode.getNodeType() == getNodeTypes.nodetype.Text) {
+              if (shouldProcessNode(childnode)) {
+                debugmsg(fname + 'Found text node. getNodeValue(): "' + childnode.getNodeValue() + '"');
+                res.push(String(childnode.getNodeValue()));
               }
             }
             // Element nodes require grouping for deduplication since we can have 2 sibling elements with the same node name
-            if ( childnode.getNodeType() == getNodeTypes.nodetype.Element ) {
+            if (childnode.getNodeType() == getNodeTypes.nodetype.Element) {
               // Deduplication of node names
-              nodename = String( childnode.getNodeName() );
-              debugmsg( fname + 'found element node "' + nodename + '"' );
-              if ( ! iterate.hasOwnProperty( nodename ) ) {
-                iterate[ nodename ] = [];
+              nodename = String(childnode.getNodeName());
+              debugmsg(fname + 'found element node "' + nodename + '"');
+              if (!iterate.hasOwnProperty(nodename)) {
+                iterate[nodename] = [];
               }
-              iterate[ nodename ].push( childnode );
+              iterate[nodename].push(childnode);
               removeobj = false;
             }
           } // Finished processing a single parent node's child nodes
@@ -1190,12 +1240,12 @@ function JSONget( inputJSON, whattoget, returntype ) {
         We can now parse those resuls recursively */
 
       // Iterates the properties and set them up recursive calling flowdata2obj again
-      for ( nodename in iterate ) {
-        res[ 0 ][ nodename ] = flowdata2obj( iterate[ nodename ] );
+      for (nodename in iterate) {
+        res[0][nodename] = flowdata2obj(iterate[nodename]);
       }
 
-      if ( removeobj ) {
-        res = res.splice( 1 );
+      if (removeobj) {
+        res = res.splice(1);
       }
     }
     return res;
@@ -1208,10 +1258,11 @@ function JSONget( inputJSON, whattoget, returntype ) {
    * @type {object}
    * @return {object} ECMA Object whose properties and their values map to the possible results of node.getNodeType().
    */
-  if ( where === 'engine' ) {
+  if (where === 'engine') {
     // Attaching to the function on load time so that it only runs once.
     getNodeTypes.nodetype = getNodeTypes();
   }
+
   function getNodeTypes() {
     var nodetype = {};
     nodetype.Attr = Packages.org.w3c.dom.Node.ATTRIBUTE_NODE;
@@ -1241,21 +1292,22 @@ function JSONget( inputJSON, whattoget, returntype ) {
    * @type {string[]}
    * @return {string[]} ECMA array.
    */
-  function JavaVectorToECMAArray( v ) {
-    var it, res = [], fname;
+  function JavaVectorToECMAArray(v) {
+    var it, res = [],
+      fname;
     fname = 'JavaVectorToECMAArray(): ';
-    if ( where !== 'engine' ) {
-      logerror( fname + 'can only be used in the workflow engine.' );
+    if (where !== 'engine') {
+      logerror(fname + 'can only be used in the workflow engine.');
       return;
     }
-    if ( v != null && typeof v === 'object' && v.size() > 0 ) {
+    if (v != null && typeof v === 'object' && v.size() > 0) {
       try {
         it = v.iterator();
-        while( it.hasNext() ) {
-          res.push( String( it.next() ) );
+        while (it.hasNext()) {
+          res.push(String(it.next()));
         }
-      } catch( e ) {
-        logerror( fname + 'Error converting Vector into Array: ' + e.message );
+      } catch (e) {
+        logerror(fname + 'Error converting Vector into Array: ' + e.message);
       }
     }
     return res;
@@ -1273,21 +1325,21 @@ function JSONget( inputJSON, whattoget, returntype ) {
    * @type {java.util.Vector}
    * @return {java.util.Vector} Java Vector.
    */
-  function ECMAArrayToJavaVector( arr ) {
+  function ECMAArrayToJavaVector(arr) {
     var i, res, fname;
     fname = 'ECMAArrayToJavaVector(): ';
-    if ( where !== 'engine' ) {
-      logerror( fname + 'can only be used in the workflow engine.' );
+    if (where !== 'engine') {
+      logerror(fname + 'can only be used in the workflow engine.');
       return;
     }
     try {
       res = new java.util.Vector();
-      for ( i = 0; i < arr.length; i++ ) {
-        res.add( JString( arr[ i ] ) );
+      for (i = 0; i < arr.length; i++) {
+        res.add(JString(arr[i]));
       }
       return res;
-    } catch( e ) {
-      logerror( fname + 'Error converting Array into Vector: ' + e.message );
+    } catch (e) {
+      logerror(fname + 'Error converting Array into Vector: ' + e.message);
     }
   }
 
@@ -1309,61 +1361,60 @@ function JSONget( inputJSON, whattoget, returntype ) {
    * @type {string[]}
    * @return {string[]} ECMA array with the results. Empty if IDVault.get returned null, array with one or more elements otherwise.
    */
-  function IDVget( ldapdn, entkey, attrkey, fieldname ) {
+  function IDVget(ldapdn, entkey, attrkey, fieldname) {
     // Variable declaration. Keep all the declarations together.
     var qres = [];
     var gattr, gattrV, errmsg, fname;
     fname = 'IDVget(): ';
     // Adjusting function input values based on where it is being executed.
-    if ( where === 'engine' ) {
+    if (where === 'engine') {
       IDVobj = IDVault;
     }
-    if ( where === 'form' ) {
-      if ( IDMAPPS.IDVault !== null ) {
+    if (where === 'form') {
+      if (IDMAPPS.IDVault !== null) {
         IDVobj = IDMAPPS.IDVault;
       } else {
-        logerror( fname + 'please use PRD.init() with at least IDVault as a parameter to initialize the mandatory reference to the same. Aborting.' );
+        logerror(fname + 'please use PRD.init() with at least IDVault as a parameter to initialize the mandatory reference to the same. Aborting.');
         return qres;
       }
     }
     // Check input parameters.
-    if ( ldapdn == null || entkey == null || attrkey == null ) {
+    if (ldapdn == null || entkey == null || attrkey == null) {
       errmsg = [];
-      errmsg.push( fname + 'missing mandatory parameters.' );
-      errmsg.push( 'ldapdn: ' + String( ldapdn ) + ',' );
-      errmsg.push( 'entkey: ' + String( entkey ) + ',' );
-      errmsg.push( 'attrkey: ' + String( attrkey ) + ',' );
-      logerror( errmsg.join( ' ' ) );
+      errmsg.push(fname + 'missing mandatory parameters.');
+      errmsg.push('ldapdn: ' + String(ldapdn) + ',');
+      errmsg.push('entkey: ' + String(entkey) + ',');
+      errmsg.push('attrkey: ' + String(attrkey) + ',');
+      logerror(errmsg.join(' '));
       return qres;
     }
     // Performs the query and handles errors
-    try
-    {
+    try {
       // Function call parameters are different between engine and form
-      if ( where === 'form' ) {
-        if ( fieldname == null ) {
+      if (where === 'form') {
+        if (fieldname == null) {
           fieldname = null;
         }
-        gattr = IDVobj.get( fieldname, ldapdn, entkey, attrkey );
+        gattr = IDVobj.get(fieldname, ldapdn, entkey, attrkey);
       }
-      if ( where === 'engine' ) {
-        gattr = IDVobj.get( ldapdn, entkey, attrkey );
+      if (where === 'engine') {
+        gattr = IDVobj.get(ldapdn, entkey, attrkey);
       }
       // Normalize results into an ECMA array
-      if ( gattr === null ) {
+      if (gattr === null) {
         // Query succeeded with 0 results. Stub left in case we need to add debug messages.
-      } else if ( isString( gattr ) ) {
+      } else if (isString(gattr)) {
         // Query succeeded with a single result. Casts result as a single-element array to the qres variable.
-        qres.push( coerceToString( gattr ) );
-      } else if ( where === 'form' && gattr instanceof Array ) {
+        qres.push(coerceToString(gattr));
+      } else if (where === 'form' && gattr instanceof Array) {
         // Query succeeded with 2 or more results. Saves results directly to the qres variable.
         qres = gattr;
-      } else if ( where === 'engine' && typeof gattr === 'object' && gattr.size() > 0 ) {
+      } else if (where === 'engine' && typeof gattr === 'object' && gattr.size() > 0) {
         // Query succeeded with 2 or more results. Saves results directly to the qres variable.
-        qres = JavaVectorToECMAArray( gattr );
+        qres = JavaVectorToECMAArray(gattr);
       }
-    } catch( e ) {
-      logerror( fname + 'Error occured during IDVault.get query. Aborting. Error message: ' + e.message );
+    } catch (e) {
+      logerror(fname + 'Error occured during IDVault.get query. Aborting. Error message: ' + e.message);
     }
     // Force the result to return a copy of the array.
     return qres;
@@ -1384,57 +1435,58 @@ function JSONget( inputJSON, whattoget, returntype ) {
    * @type {string[]}
    * @return {string[]} Array with LDAP DNs returned.
    */
-  function IDVglobalQuery( dalquerykey, parameters, fieldname ) {
+  function IDVglobalQuery(dalquerykey, parameters, fieldname) {
     // Variable declaration. Keep all the declarations together.
     var qres = [];
-    var gqr, errmsg, pconv = '', fname;
+    var gqr, errmsg, pconv = '',
+      fname;
     fname = 'IDVglobalQuery(): ';
     // Adjusting function input values based on where it is being executed.
-    if ( where === 'engine' ) {
+    if (where === 'engine') {
       IDVobj = IDVault;
     }
-    if ( where === 'form' ) {
-      if ( IDMAPPS.IDVault !== null ) {
+    if (where === 'form') {
+      if (IDMAPPS.IDVault !== null) {
         IDVobj = IDMAPPS.IDVault;
       } else {
-        logerror( fname + 'please use PRD.init() with at least IDVault as a parameter to initialize the mandatory reference to the same. Aborting.' );
+        logerror(fname + 'please use PRD.init() with at least IDVault as a parameter to initialize the mandatory reference to the same. Aborting.');
         return qres;
       }
     }
     // Check input parameters.
-    if ( dalquerykey == null || parameters == null ) {
+    if (dalquerykey == null || parameters == null) {
       errmsg = [];
-      errmsg.push( fname + 'missing mandatory parameters.' );
-      errmsg.push( 'dalquerykey: ' + String( dalquerykey ) + ',' );
-      if ( parameters === null ) {
-        pconv = String( parameters );
+      errmsg.push(fname + 'missing mandatory parameters.');
+      errmsg.push('dalquerykey: ' + String(dalquerykey) + ',');
+      if (parameters === null) {
+        pconv = String(parameters);
       } else {
-        pconv = JSONstringify( parameters );
+        pconv = JSONstringify(parameters);
       }
-      errmsg.push( 'parameters: ' + pconv + ',' );
-      logerror( errmsg.join( ' ' ) );
+      errmsg.push('parameters: ' + pconv + ',');
+      logerror(errmsg.join(' '));
       return qres;
     }
     // Performs the query and handles errors
     try {
       // Function call parameters are different between engine and form, as are return types.
-      if ( where === 'form' ) {
-        if ( fieldname == null ) {
+      if (where === 'form') {
+        if (fieldname == null) {
           fieldname = null;
         }
-        gqr = IDVobj.globalQuery( fieldname, dalquerykey, parameters );
-        if ( gqr instanceof Array && gqr[ 0 ] instanceof Array > 0 && gqr[ 0 ][ 0 ] != '' ) {
-          qres = gqr[ 0 ];
+        gqr = IDVobj.globalQuery(fieldname, dalquerykey, parameters);
+        if (gqr instanceof Array && gqr[0] instanceof Array > 0 && gqr[0][0] != '') {
+          qres = gqr[0];
         }
       }
-      if ( where === 'engine' ) {
-        gqr = IDVobj.globalQuery( dalquerykey, parameters );
-        if ( gqr != null && gqr.size() > 0 ) {
-          qres = JavaVectorToECMAArray( gqr );
+      if (where === 'engine') {
+        gqr = IDVobj.globalQuery(dalquerykey, parameters);
+        if (gqr != null && gqr.size() > 0) {
+          qres = JavaVectorToECMAArray(gqr);
         }
       }
-    } catch ( e ) {
-      logerror( fname + 'Error occured during IDVault.globalQuery . Aborting. Error message: ' + e.message );
+    } catch (e) {
+      logerror(fname + 'Error occured during IDVault.globalQuery . Aborting. Error message: ' + e.message);
     }
     return qres;
   }
@@ -1450,35 +1502,36 @@ function JSONget( inputJSON, whattoget, returntype ) {
    * @param {string=}  [DefaultValue]  Default value to be used if the GCV.get() fails. Defaults to '' if not provided.
    * @return {(string|number|boolean)} GCV.get result or default value.
    */
-  function GCVget( GCVname, returnType, DefaultValue ) {
-    var ret, defval = '', fname;
+  function GCVget(GCVname, returnType, DefaultValue) {
+    var ret, defval = '',
+      fname;
     fname = 'GCVget(): ';
-    if ( DefaultValue != null ) {
-      defval = String( DefaultValue );
+    if (DefaultValue != null) {
+      defval = String(DefaultValue);
     }
-    if ( GCVname != null && GCVname !== '' ) {
-      GCVname = String( GCVname );
+    if (GCVname != null && GCVname !== '') {
+      GCVname = String(GCVname);
       try {
-        ret = GCV.get( GCVname );
-      } catch ( e ) {
-        logerror( fname + 'Failed to retrieve value for GCV "' + GCVname + '", Error: ' + e.message );
+        ret = GCV.get(GCVname);
+      } catch (e) {
+        logerror(fname + 'Failed to retrieve value for GCV "' + GCVname + '", Error: ' + e.message);
       }
     } else {
-      logerror( fname + 'GCVname not provided.' );
+      logerror(fname + 'GCVname not provided.');
     }
     // Failed to retrieve the GCV
-    if (! ret ) {
-      logerror( fname + 'GCV.get( "' + GCVname + '" ) returned null value. Please make sure the same is available on the User Application driver' );
+    if (!ret) {
+      logerror(fname + 'GCV.get( "' + GCVname + '" ) returned null value. Please make sure the same is available on the User Application driver');
       ret = defval;
     }
     // Coerce result as we return it.
-    switch( String( returnType ) ) {
+    switch (String(returnType)) {
       case 'boolean':
-        return Boolean( ret );
+        return Boolean(ret);
       case 'number':
-        return Number( ret );
+        return Number(ret);
       default: // case 'string' overlaps with this one
-        return String( ret );
+        return String(ret);
     }
   }
 
@@ -1496,54 +1549,56 @@ function JSONget( inputJSON, whattoget, returntype ) {
    *                                 If provides and read fails try 4 more times, with 1 second pause between them.
    * @return {(string|null)} GCV.getValueForNamedPassword result or null.
    */
-  function getNamedPassword( NamedPassword, try5times ) {
-    var i, ret = null, fname;
+  function getNamedPassword(NamedPassword, try5times) {
+    var i, ret = null,
+      fname;
     fname = 'getNamedPassword(): ';
-    if ( NamedPassword != null && NamedPassword !== '' ) {
-      NamedPassword = String( NamedPassword );
-      if ( try5times != null ) {
+    if (NamedPassword != null && NamedPassword !== '') {
+      NamedPassword = String(NamedPassword);
+      if (try5times != null) {
         // This approach will hold the Java thread up to 5 seconds, possibly causing resource contention
         // on the workflow engine. Rule of thumb we should avoid using java.lang.Thread.sleep() inside workflows
         // on systems with medium to large load.
         try5times: {
-          for ( i = 0; i < 5; i++ ){
+          for (i = 0; i < 5; i++) {
             try {
-              ret = GCV.getValueForNamedPassword( NamedPassword );
-            } catch ( e ) {
-              logerror( fname + 'Failed to retrieve value for Named Password "' + NamedPassword + '", Error: ' + e.message );
+              ret = GCV.getValueForNamedPassword(NamedPassword);
+            } catch (e) {
+              logerror(fname + 'Failed to retrieve value for Named Password "' + NamedPassword + '", Error: ' + e.message);
             }
-            if ( ret != null && ret !== '' ) {
+            if (ret != null && ret !== '') {
               break try5times;
             }
             // 1 second delay
             try {
-              logerror( fname + 'Failed attempt ' + (i+1) + ' to retrieve Named Password "' + NamedPassword + '". Pausing for 1 second then retrying.' );
-              java.lang.Thread.sleep( 1000 );
-            } catch ( e ) {
-              logerror( fname + 'And now failed to try and pause for a second as well. Error: ' + e.message );
+              logerror(fname + 'Failed attempt ' + (i + 1) + ' to retrieve Named Password "' + NamedPassword + '". Pausing for 1 second then retrying.');
+              java.lang.Thread.sleep(1000);
+            } catch (e) {
+              logerror(fname + 'And now failed to try and pause for a second as well. Error: ' + e.message);
             }
           }
         }
-      } else {
+      }
+      else {
         try {
-          ret = GCV.getValueForNamedPassword( NamedPassword );
-        } catch ( e ) {
-          logerror( fname + 'Failed to retrieve value for Named Password "' + NamedPassword + '", Error: ' + e.message );
+          ret = GCV.getValueForNamedPassword(NamedPassword);
+        } catch (e) {
+          logerror(fname + 'Failed to retrieve value for Named Password "' + NamedPassword + '", Error: ' + e.message);
         }
       }
     } else {
-      logerror( fname + 'NamedPassword not provided.' );
+      logerror(fname + 'NamedPassword not provided.');
     }
     // Failed to retrieve the GCV
-    if (! ret ) {
-      logerror( fname + 'GCV.getValueForNamedPassword( "' + NamedPassword + '" ) returned null value. Please make sure the same is available on the User Application driver' );
+    if (!ret) {
+      logerror(fname + 'GCV.getValueForNamedPassword( "' + NamedPassword + '" ) returned null value. Please make sure the same is available on the User Application driver');
       return '';
     }
     return ret;
   }
 
   // Engine-only API extensions:
-  if ( where === 'engine' ) {
+  if (where === 'engine') {
     PublicAPI.util.JavaVectorToECMAArray = JavaVectorToECMAArray;
     PublicAPI.util.ECMAArrayToJavaVector = ECMAArrayToJavaVector;
     PublicAPI.util.GCVget = GCVget;
@@ -1554,12 +1609,12 @@ function JSONget( inputJSON, whattoget, returntype ) {
     PublicAPI.util.isJavaVector = isJavaVector;
   }
   // Form-only API extensions:
-  if ( where === 'form' ) {
+  if (where === 'form') {
     PublicAPI.init = formInit;
     PublicAPI.web = {
-      fieldVisibility:fieldVisibility
+      fieldVisibility: fieldVisibility
     };
   }
 
   return PublicAPI;
-})( '===> ');
+})('===> ');
