@@ -67,16 +67,42 @@ More information about the product this can be used with can be found at <a href
     An added bonus of this approach is that when looking at the web server's log the Activity: portion of the trace will have something that should help you understand where in the flow that particular process is at, instead of a number that have no meaning by itself. Of course to realize this benefit at least approval and flow control activities (branch, merge, condition) would need to have to be renamed.
 
 
-### Notes
+## Notes
 
-Retrieving a work flow's flowdata in IDM 4.5/4.6 is fairly simple. The information resides on the RBPM database, afdocument table, metaxml column. Each supported database will have its own command line tools we can use to automate the process.
+1. Retrieving a work flow's flowdata in IDM 4.5/4.6 is fairly simple. The information resides on the RBPM database, afdocument table, metaxml column. Each supported database will have its own command line tools we can use to automate the process.
 
-Assuming a standard Postgresql install as the RBPM database we can run the command:
+    Assuming a standard Postgresql install as the RBPM database we can run the command:
 
-```
-/opt/netiq/idm/apps/postgres/bin/psql -U postgres -d idmuserappdb -c "COPY (SELECT metaxml FROM afdocument WHERE requestid='largehexvalue') TO STDOUT" | sed -e 's/\\n//g' | xmllint --format - > /somefilepath/flowdata.xml
-```
+    ```
+    /opt/netiq/idm/apps/postgres/bin/psql -U postgres -d idmuserappdb -c "COPY (SELECT metaxml FROM afdocument WHERE requestid='largehexvalue') TO STDOUT" | sed -e 's/\\n//g' | xmllint --format - > /somefilepath/flowdata.xml
+    ```
 
-where largehexvalue should be the workflow's request ID as seen in multiple places such as the web server's log, and look similar to this string: 4052f820a9db47cbace1a7fd82c88e90 .
-somefilepath should be the path where you want to save your workflow's flowdata XML export.
-The sed and xmllint portions of the command simply pretty-format the returned XML with line breaks and indentation.
+    where largehexvalue should be the workflow's request ID as seen in multiple places such as the web server's log, and look similar to this string: 4052f820a9db47cbace1a7fd82c88e90 somefilepath should be the path where you want to save your workflow's flowdata XML export. The sed and xmllint portions of the command simply pretty-format the returned XML with line breaks and indentation.
+
+2. ECMA execution order when a form loads on the browser
+
+    Engine scripts run first, their output goes to catalina.out:
+    * engine: Overview > Global Scripts
+      * Globalscripts load top to bottom
+    * engine: Start > Pre Activity > [fieldname]
+      * Field scripts are NOT executed top to bottom. Not sure on the order, currently suspect it may be alphabetical by field name
+
+    Form (in browser) scripts run next, their output go to the form's HTML or the browser's console.log:
+    * form: Overview > Global Scripts
+      * Globalscripts load top to bottom
+    * form: Form > Scripts > [script]
+      * Scripts execute top to bottom
+    * form: Form > Events > onload
+    * form: Form > Fields > [field] > HTML Content
+      * Fields are processed top to bottom
+      * Only String-HTML fields have the "HTML Content" property
+    * form: Form > Fields > [field] > onload
+    * form: Form > Fields > [field] > onchange
+
+
+    Comments:
+
+    * Field events seem to trigger top to bottom based on their order in Designer;
+    * Field onload happens on any given field before onchange. Onchange does trigger once during form load, so plan for I;
+    * HTML Content ECMA script runs before the field events;
+    * onchange did not trigger at all on the HTML field despite being set. Other field types might have the same constraint.
