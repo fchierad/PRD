@@ -103,6 +103,6 @@ More information about the product this can be used with can be found at <a href
     Comments:
 
     * Field events seem to trigger top to bottom based on their order in Designer;
-    * Field onload happens on any given field before onchange. Onchange does trigger once during form load, so plan for I;
+    * Field onload happens on any given field before onchange. Onchange does trigger once during form load, so plan for It;
     * HTML Content ECMA script runs before the field events;
     * onchange did not trigger at all on the HTML field despite being set. Other field types might have the same constraint.
