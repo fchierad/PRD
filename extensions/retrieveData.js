@@ -90,7 +90,7 @@
    * @param {attributemap}  mapObject           Map Object in the format. { 'level of details':[ attribute array ],... }
    * @param {string=}       [childFnLogName]   Trace name to be used by the generated function.
    * @type {function}
-   * @return {function} readEntity function for the selected DAl entity and map object.
+   * @return {function} readEntity function for the selected DAL entity and map object.
    */
   function factory( dalEntity, mapObject, childFnLogName ) {
     var fname, invalidParams, i, details;

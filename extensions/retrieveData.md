@@ -37,7 +37,7 @@ Clear module's query cache. Returns nothing.
 Generate retrieval function for objects where the function reads multiple DAL attributes.
 
 **Kind**: static method of [<code>retrieveData</code>](#module_retrieveData)  
-**Returns**: <code>function</code> - readEntity function for the selected DAl entity and map object.  
+**Returns**: <code>function</code> - readEntity function for the selected DAL entity and map object.  
 **Since**: 1.0.0  
 
 | Param | Type | Description |
