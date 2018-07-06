@@ -2,8 +2,9 @@
 Repository to store ECMAScript code used in workflows created with the product NetIQ Identity Manager.
 
 * <a href="PRD.js">PRD.js</a>: Development version of the library, with full comments and variable names.
-
-Function documentation can be found at <a href="PRD.md">PRD.md</a>
+    * Function documentation can be found at <a href="PRD.md">PRD.md</a>
+* <a href="extensions/retrieveData.js">retrieveData.js</a>: Extension to PRD that facilitates reading multiple attributes from an entity
+    * Extension documentation can be found at <a href="extensions/retrieveData.md">retrieveData.md</a>
 
 More information about the product this can be used with can be found at <a href="https://www.netiq.com">https://www.netiq.com</a>
 
