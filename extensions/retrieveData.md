@@ -4,13 +4,15 @@
 retrieveData - PRD extension, usable on the form only.<br/>Creates functions that will perform object queries for multiple attributes at different detail levels,while caching the results per LDAP DN in the local browser session. Cache expires on page/form/module reload. <br/>Module loads as PRD.extensions.retrieveData<br/>
 
 **Requires**: <code>module:PRD</code>  
-**Version**: 1.0.0  
+**Version**: 1.0.1  
 **License**: MIT License  
 
 * [retrieveData](#module_retrieveData)
     * _static_
         * [.version()](#module_retrieveData.version) ⇒ <code>string</code>
         * [.clearcache()](#module_retrieveData.clearcache)
+        * [.removefromcache(ldapdn)](#module_retrieveData.removefromcache) ⇒ <code>boolean</code>
+        * [.listentries()](#module_retrieveData.listentries) ⇒ <code>Array.&lt;string&gt;</code>
         * [.factory(dalEntity, mapObject, [childFnLogName])](#module_retrieveData.factory) ⇒ <code>function</code>
             * [~readEntity(ldapdn, detaillvl)](#module_retrieveData.factory..readEntity) ⇒ <code>object</code>
     * _inner_
@@ -31,6 +33,27 @@ Clear module's query cache. Returns nothing.
 
 **Kind**: static method of [<code>retrieveData</code>](#module_retrieveData)  
 **Since**: 1.0.0  
+<a name="module_retrieveData.removefromcache"></a>
+
+### retrieveData.removefromcache(ldapdn) ⇒ <code>boolean</code>
+Remove a single LDAP DN from the cache.
+
+**Kind**: static method of [<code>retrieveData</code>](#module_retrieveData)  
+**Returns**: <code>boolean</code> - true if cache entry removed successfully, false if entry was not present.  
+**Since**: 1.0.1  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| ldapdn | <code>string</code> | User DN in FQDN LDAP format |
+
+<a name="module_retrieveData.listentries"></a>
+
+### retrieveData.listentries() ⇒ <code>Array.&lt;string&gt;</code>
+Lists all cached entries LDAP DNs.
+
+**Kind**: static method of [<code>retrieveData</code>](#module_retrieveData)  
+**Returns**: <code>Array.&lt;string&gt;</code> - Array of strings containing all cached DNs.  
+**Since**: 1.0.1  
 <a name="module_retrieveData.factory"></a>
 
 ### retrieveData.factory(dalEntity, mapObject, [childFnLogName]) ⇒ <code>function</code>

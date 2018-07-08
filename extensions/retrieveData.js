@@ -5,15 +5,15 @@
  * Module loads as PRD.extensions.retrieveData<br/>
  * @module retrieveData
  * @requires PRD
- * @version 1.0.0
+ * @version 1.0.1
  * @license MIT License
  */
 (function IIFE() {
-  var arr, major, minor, patch, cache;
+  var arr, major, minor, patch, cache, logmsg, dbgmsg, isString;
   cache = {}; // used to store query results for the current session
 
   // Validates we have the PRD module loaded, and if so extendes it with retrieveData
-  if ( window.PRD != null && PRD.hasOwnProperty( 'version' ) ) {
+  if ( window != null && window.PRD != null && PRD.hasOwnProperty( 'version' ) ) {
     arr = PRD.version().split( '.' );
     major = Number( arr[ 0 ] );
     minor = Number( arr[ 1 ] );
@@ -27,8 +27,15 @@
           factory:factory,
           version:version,
           clearcache:clearcache,
+          removefromcache:removefromcache,
+          listentries:listentries,
         };
-        PRD.util.logerror( 'Module loaded: PRD.extensions.retrieveData version ' + version() );
+        // Function abstractions for easier refactoring
+        logmsg = PRD.util.logerror;
+        dbgmsg = PRD.util.debugmsg;
+        isString = PRD.util.isString;
+        logmsg( 'Module loaded: PRD.extensions.retrieveData version ' + version() );
+
       }
     } else {
       console.log( 'Incorrect PRD module version. Requires 1.0.6 or later, found: ' + arr.join( '.' ) );
@@ -46,7 +53,7 @@
    * @return {string} Module's version in the format M.m.p (Major, minor, patch)
    */
   function version() {
-    return '1.0.0';
+    return '1.0.1';
   }
 
   /**
@@ -55,9 +62,36 @@
    * @since 1.0.0
    */
   function clearcache() {
-    PRD.util.logerror( 'retrieveData: Internal cache contain attribute values for: ' + Object.keys( cache ).sort().join( '; ' ) );
+    dbgmsg( 'retrieveData: Internal cache contain attribute values for: ' + Object.keys( cache ).sort().join( '; ' ) );
     cache = {};
-    PRD.util.logerror( 'retrieveData: cache cleared.' );
+    logmsg( 'retrieveData: cache cleared.' );
+  }
+
+  /**
+   * Remove a single LDAP DN from the cache.
+   * @memberof module:retrieveData
+   * @since 1.0.1
+     * @param {string} ldapdn     User DN in FQDN LDAP format
+     * @type {boolean}
+     * @return {boolean} true if cache entry removed successfully, false if entry was not present.
+   */
+  function removefromcache( ldapdn ) {
+    if ( cache.hasOwnProperty( ldapdn) ) {
+      delete cache[ ldapdn ];
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * Lists all cached entries LDAP DNs.
+   * @memberof module:retrieveData
+   * @since 1.0.1
+   * @type {string[]}
+   * @return {string[]} Array of strings containing all cached DNs.
+   */
+  function listentries() {
+    return Object.keys( cache ).sort();
   }
 
   /**
@@ -97,32 +131,32 @@
     fname = 'PRD.extensions.retrieveData.factory(): ';
     // Input parameter validation
     invalidParams = false;
-    if ( ! PRD.util.isString( dalEntity ) ) {
-      PRD.util.logerror( fname + 'dalEntity must be a string and match a valid DAL entity key.' );
+    if ( ! isString( dalEntity ) ) {
+      logmsg( fname + 'dalEntity must be a string and match a valid DAL entity key.' );
       invalidParams = true;
     }
-    if ( ! PRD.util.isString( childFnLogName ) ) {
+    if ( ! isString( childFnLogName ) ) {
       childFnLogName = 'retrieve' + dalEntity + 'Data';
     }
     if ( mapObject == null || typeof mapObject !== 'object' ) {
-      PRD.util.logerror( fname + 'mapObject must be an object with the outlined structure.' );
+      logmsg( fname + 'mapObject must be an object with the outlined structure.' );
       invalidParams = true;
     } else {
       details = Object.keys( mapObject ).sort();
-      PRD.util.debugmsg( fname + 'mapObject detail levels retrieved: ' + details.join( '; ' ) );
+      dbgmsg( fname + 'mapObject detail levels retrieved: ' + details.join( '; ' ) );
       if ( details.length <= 0 ) {
-        PRD.util.logerror( fname + 'mapObject must contain at least one detail level property.' );
+        logmsg( fname + 'mapObject must contain at least one detail level property.' );
         invalidParams = true;
       }
       for ( i in details ) {
         if ( ! ( mapObject[ details[ i ] ] instanceof Array ) ) {
-          PRD.util.logerror( fname + 'mapObject key "' + details[ i ] + '" must be an array of strings with the DAL attribute keys.' );
+          logmsg( fname + 'mapObject key "' + details[ i ] + '" must be an array of strings with the DAL attribute keys.' );
           invalidParams = true;
         }
       }
     }
     if ( invalidParams ) {
-      PRD.util.logerror( fname + 'Invalid parameters received, aborting funciton generation.' );
+      logmsg( fname + 'Invalid parameters received, aborting funciton generation.' );
       return null;
     }
 
@@ -135,18 +169,18 @@
      *   If invalid parameters are passed an empty object is returned.
      */
     function readEntity( ldapdn, detaillvl ) {
-      var fname, attrs, res, authcookie, uri, RESTurl;
+      var fname, attrs, res;
       fname = childFnLogName + '(): ';
       res = {};
       // input parameter validation
-      if ( ldapdn === '' || ! PRD.util.isString( ldapdn ) ) {
-        PRD.util.logerror( fname + 'ldapdn must be a string representation of a LDAP FQDN.' );
+      if ( ldapdn === '' || ! isString( ldapdn ) ) {
+        logmsg( fname + 'ldapdn must be a string representation of a LDAP FQDN.' );
         return res;
       }
       if ( details.indexOf( String( detaillvl ) ) === -1 ) {
         detaillvl = details[ 0 ];
       }
-      PRD.util.debugmsg( fname + 'LDAP DN: "' + ldapdn + '", Detail level: "' + detaillvl + '"' );
+      dbgmsg( fname + 'LDAP DN: "' + ldapdn + '", Detail level: "' + detaillvl + '"' );
 
       // Data retrieval using IDVault.get() approach.
       attrs = mapObject[ detaillvl ].slice();
@@ -157,11 +191,11 @@
       attrs.forEach( function getValues( attribute ) {
         if ( cache[ ldapdn ].hasOwnProperty( attribute ) ) {
           res[ attribute ] = cache[ ldapdn ][ attribute ].slice();
-          PRD.util.debugmsg( fname + 'from Session cache: Attribute: "' + attribute + '", Value(s): "' + res[ attribute ].join( '"; "' ) + '"' );
+          dbgmsg( fname + 'from Session cache: Attribute: "' + attribute + '", Value(s): "' + res[ attribute ].join( '"; "' ) + '"' );
         } else {
           res[ attribute ] = PRD.IDVget( ldapdn, 'user', attribute );
           cache[ ldapdn ][ attribute ] = res[ attribute ].slice();
-          PRD.util.debugmsg( fname + 'from IDVault.get: Attribute: "' + attribute + '", Value(s): "' + res[ attribute ].join( '"; "' ) + '"' );
+          dbgmsg( fname + 'from IDVault.get: Attribute: "' + attribute + '", Value(s): "' + res[ attribute ].join( '"; "' ) + '"' );
         }
       });
 
