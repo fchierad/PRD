@@ -8,9 +8,11 @@
  * @license MIT License
  */
 (function IIFE() {
-  var arr, major, minor, patch, storage, logmsg, dbgmsg, isString, mainpartitionname;
+  "use strict";
+  var arr, major, minor, patch, initref, storage, logmsg, dbgmsg, isString, mainpartitionname, msgprefix;
   storage = {};
   mainpartitionname = 'ctask_main_partition';
+  msgprefix = 'ctask: '; // PRefix for module's logmsg & dbgmsg function calls.
 
   /* internal data structure (proposal):
   - storage:{ partition_ids }
@@ -36,17 +38,14 @@
           }
           if ( ! PRD.hasOwnProperty( 'ctask' ) ) {
             PRD.extensions.ctask = partition_create( mainpartitionname, 'basic' );
-            PRD.extensions.ctask.listpartitions = listpartitions;
-            PRD.extensions.ctask.partitionexists = partition_exists;
-            PRD.extensions.ctask.createpartition = partition_create;
-            PRD.extensions.ctask.destroypartition = partition_destroy;
+            initref = PRD.extensions.ctask;
             // Function abstractions for easier refactoring
             logmsg = PRD.util.logerror;
             dbgmsg = PRD.util.debugmsg;
             isString = PRD.util.isString;
             isNumber = PRD.util.isNumber;
             isBoolean = PRD.util.isBoolean;
-            logmsg( 'Module loaded: PRD.extensions.cdata version ' + version() );
+            logmsg( 'Module loaded: PRD.extensions.ctask version ' + version() );
           }
         } else {
           console.log( 'Incorrect PRD module version. Requires 1.0.6 or later, found: ' + arr.join( '.' ) );
@@ -60,11 +59,12 @@
         isNumber = function (i) {return ( typeof i === 'number' || ( typeof i === 'object' && i instanceof Number ) ); };
         isBoolean = function (i) {return ( typeof i === 'boolean' || ( typeof i === 'object' && i instanceof Boolean ) ); };
         window.ctask = partition_create( 'ctask_main_partition', 'basic' );
-        window.ctask.listpartitions = listpartitions;
-        window.ctask.partitionexists = partition_exists;
-        window.ctask.createpartition = partition_create;
-        window.ctask.destroypartition = partition_destroy;
+        initref = window.ctask;
       }
+      initref.listpartitions = listpartitions;
+      initref.partitionexists = partition_exists;
+      initref.createpartition = partition_create;
+      initref.destroypartition = partition_destroy;
     }
 
   /**
@@ -76,7 +76,7 @@
    * @return {string} Module's version in the format M.m.p (Major, minor, patch)
    */
   function version() {
-    return 'Alpha 1';
+    return 'Alpha 2';
   }
 
   // === Partition ===
@@ -126,7 +126,7 @@
       type = 'basic';
     }
     if ( partition_exists( id ) ) {
-      logmsg( 'ctask: Failed to create new data partition, partition already exists: ' + id );
+      logmsg( msgprefix + ' Failed to create new data partition, partition already exists: ' + id );
       return null;
     }
     // Instantiates data partition
@@ -152,11 +152,11 @@
   function partition_destroy( id ) {
     id = String( id );
     if ( id === mainpartitionname ) {
-      dbgmsg( 'Main partition "' + mainpartitionname + '" cannot be destroyed.' );
+      dbgmsg( msgprefix + 'Main partition "' + mainpartitionname + '" cannot be destroyed.' );
       return false;
     }
+    // Delete storage partition
     if ( partition_exists( id ) ) {
-      // Delete storage partition
       delete storage[ id ];
     }
     return ! partition_exists( id );
@@ -169,11 +169,11 @@
    * @return {object} Entry API object
    */
   function new_partition( id ) {
-    var partition_ref, destroyed, destroyedmsg, PartitionAPI;
+    var partmsgprefix, partition_ref, destroyed, PartitionAPI;
     id = String( id );
+    partmsgprefix = 'ctask: ' + id + ': ';
     partition_ref = storage[ id ]; // Used by the child functions returned in the API
-    destroyedmsg = 'Partition "' + id + '" has been destroyed. Aborting function execution.';
-    destroyed = false;
+
     PartitionAPI = {
       name:id,
       listentries:listentries,
@@ -191,25 +191,43 @@
     };
     // Main partition cannot be destroyed
     if ( id !== mainpartitionname ) {
-      PartitionAPI.destroy = destroy;
+      PartitionAPI.destroy = destroy_PartitionAPI;
     }
     return PartitionAPI;
 
     /**
-     * Destroy a data partition.
+     * Check if the partition has been destroyed.
+     * @type {boolean}
+     * @return {boolean}
+     *
+     */
+    function partition_invalid() {
+      if ( partition_exists( id ) ) {
+        return false;
+      } else {
+        logmsg( partmsgprefix + 'Partition has been destroyed. Aborting function execution.' );
+        return true;
+      }
+    }
+
+    /**
+     * Destroy a data partition and removes this instance's references to its API.
      * @type {boolean}
      * @return {boolean} true if the partition has been destroyed, false otherwise.
      */
-    function destroy() {
+    function destroy_PartitionAPI() {
       if ( id === mainpartitionname ) {
-        dbgmsg( 'Main partition "' + mainpartitionname + '" cannot be destroyed.' );
+        dbgmsg( partmsgprefix + 'Main partition "' + mainpartitionname + '" cannot be destroyed.' );
         return false;
       }
+      // Delete storage partition
       if ( partition_exists( id ) ) {
-        // Delete storage partition
-        destroyed = true;
         delete storage[ id ];
       }
+      // Clears local PArtitionAPI instance
+      Object.keys( PartitionAPI ).forEach( function clearAPI( key ) {
+        delete PartitionAPI[ key ];
+      });
       return ! partition_exists( id );
     }
 
@@ -225,23 +243,12 @@
     }
 
     /**
-     * Validate that partition has not been destroyed outside of the returned object. Returns nothing.
-     */
-    function partition_valid() {
-      if ( ! destroyed && ! partition_exists( id ) ) {
-        destroyed = true;
-      }
-    }
-
-    /**
      * Display all entries on this partition
      * @type {string[]}
      * @return {string[]} Array with uuid values of all entries in this partition
      */
     function listentries() {
-      partition_valid();
-      if ( destroyed ) {
-        logmsg( destroyedmsg );
+      if ( partition_invalid() ) {
         return [];
       }
       return Object.keys( entry_data_ref() ).sort().slice();
@@ -254,9 +261,7 @@
      * @return {boolean} true if entry exists in partition, false otherwise.
      */
     function entry_has( uuid ) {
-      partition_valid();
-      if ( destroyed ) {
-        logmsg( destroyedmsg );
+      if ( partition_invalid() ) {
         return false;
       }
       return entry_data_ref().hasOwnProperty( String( uuid ) );
@@ -269,16 +274,15 @@
      * @return {boolean} true if successful, false otherwise.
      */
     function entry_add( uuid ) {
-      partition_valid();
-      if ( destroyed ) {
-        logmsg( destroyedmsg );
+      if ( partition_invalid() ) {
         return false;
       }
       uuid = String( uuid );
       if ( entry_has( uuid ) ) {
-        dbgmsg( 'ctask: attempted to create an entry (' + uuid + ') that already exists in this partition.' );
+        dbgmsg( partmsgprefix + 'attempted to create an entry (' + uuid + ') that already exists in this partition.' );
         return false;
       }
+
       entry_data_ref()[ uuid ] = {
         permissions:{}, // Only used in 'extended' partitions
         properties:{}, // Entry properties
@@ -293,18 +297,18 @@
      * @return {boolean} true if successful, false otherwise.
      */
     function entry_remove( uuid ) {
-      partition_valid();
-      if ( destroyed ) {
-        logmsg( destroyedmsg );
+      if ( partition_invalid() ) {
         return false;
       }
+
       uuid = String( uuid );
-      if ( entry_has( uuid ) ) {
-        delete entry_data_ref()[ uuid ];
-        return ! entry_has( uuid );
+      if ( ! entry_has( uuid ) ) {
+        dbgmsg( partmsgprefix + 'attempted to delete an entry (' + uuid + ') that does not exist in this partition.' );
+        return false;
       }
-      dbgmsg( 'ctask: attempted to delete an entry that does not exist in this partition.' );
-      return false;
+
+      delete entry_data_ref()[ uuid ];
+      return ! entry_has( uuid );
     }
 
     /**
@@ -315,26 +319,26 @@
      */
     function entry_read( uuid ) {
       var entryProperties, entrycopy;
-      partition_valid();
-      if ( destroyed ) {
-        logmsg( destroyedmsg );
+      if ( partition_invalid() ) {
         return {};
       }
+
       uuid = String( uuid );
-      if ( entry_has( uuid ) ) {
-        entrycopy = {};
-        entryProperties = entry_data_ref()[ uuid ].properties;
-        Object.keys( entryProperties ).forEach( function copyProperties( property ) {
-          if ( entryProperties[ property ] instanceof Array ) {
-            entrycopy[ property ] = entryProperties[ property ].slice();
-          } else {
-            entrycopy[ property ] = entryProperties[ property ];
-          }
-        });
-        return entrycopy;
+      if ( ! entry_has( uuid ) ) {
+        dbgmsg( partmsgprefix + 'attempted to read an entry (' + uuid + ') that does not exist in this partition.' );
+        return {};
       }
-      dbgmsg( 'ctask: attempted to read an entry that does not exist in this partition.' );
-      return {};
+
+      entrycopy = {};
+      entryProperties = entry_data_ref()[ uuid ].properties;
+      Object.keys( entryProperties ).forEach( function copyProperties( property ) {
+        if ( entryProperties[ property ] instanceof Array ) {
+          entrycopy[ property ] = entryProperties[ property ].slice();
+        } else {
+          entrycopy[ property ] = entryProperties[ property ];
+        }
+      });
+      return entrycopy;
     }
 
     /**
@@ -345,9 +349,7 @@
      */
     function entry_readAll() {
       var all, entries;
-      partition_valid();
-      if ( destroyed ) {
-        logmsg( destroyedmsg );
+      if ( partition_invalid() ) {
         return [];
       }
 
@@ -380,16 +382,16 @@
      */
     function getEntryReference( uuid ) {
       var EntryAPI;
-      partition_valid();
-      if ( destroyed ) {
-        logmsg( destroyedmsg );
+      if ( partition_invalid() ) {
         return null;
       }
+
       uuid = String( uuid );
       if ( ! entry_has( uuid ) ) {
-        dbgmsg( 'Attempt to create entry reference for an entry not present on the partition.' );
+        dbgmsg( partmsgprefix + 'Attempt to create reference for an entry (' + uuid + ') not present on the partition.' );
         return null;
       }
+
       EntryAPI = {
         name:uuid,
         has:property_has.bind( null, uuid ),
@@ -413,13 +415,15 @@
      */
     function property_has( uuid, property ) {
       var entryproperties, entrypermissions;
-      partition_valid();
-      if ( destroyed ) {
-        logmsg( destroyedmsg );
+      if ( partition_invalid() ) {
         return false;
       }
       uuid = String( uuid );
       property = String( property );
+      if ( ! entry_has( uuid ) ) {
+        dbgmsg( partmsgprefix + 'Property check failed, entry "' + uuid + '" not available.' );
+        return false;
+      }
 
       entryproperties = entry_data_ref()[ uuid ].properties;
       entrypermissions = entry_data_ref()[ uuid ].permissions;
@@ -428,62 +432,70 @@
     }
 
     /**
-     * Add property to the entry with a null value. If entry does not exist will create the same.
-     * @param {string} uuid     entry unique identifier.
-     * @param {string} property entry's property name.
+     * Add property to the entry with provided value. Will fail if property already exists.
+     * Any value other than string, number, boolean, null or array will cause the function to abort.
+     * @param {string} uuid                                 entry unique identifier.
+     * @param {string} property                             entry's property name.
+     * @param {(string|number|boolean|null|any[])} value    entry's property value.
      * @type {boolean}
      * @return {boolean} true if successful, false otherwise.
      */
-    function property_add( uuid, property ) {
+    function property_add( uuid, property, value ) {
       var entryproperties, entrypermissions;
-      partition_valid();
-      if ( destroyed ) {
-        logmsg( destroyedmsg );
+      if ( partition_invalid() ) {
         return false;
       }
+
       uuid = String( uuid );
       property = String( property );
-      // Make sure entry exists
       if ( ! entry_has( uuid ) ) {
-        if ( ! entry_add( uuid ) ) {
-          return false;
-        }
+        dbgmsg( partmsgprefix + ' Add property failed, entry "' + uuid + '" not available.' );
+        return false;
+      }
+      if ( property_has( uuid, property ) ) {
+        dbgmsg( partmsgprefix + 'Add property failed, property "' + property + '" already exists in entry "' + uuid + '".' );
+        return false;
+      }
+      if ( !( value === null || isString( value ) || isNumber( value ) ||  isBoolean( value ) || value instanceof Array ) ) {
+        dbgmsg( partmsgprefix + 'Add property failed, unsupported value type. Aborting.' );
+        return false;
       }
 
       entryproperties = entry_data_ref()[ uuid ].properties;
       entrypermissions = entry_data_ref()[ uuid ].permissions;
 
-      if ( property_has( uuid, property ) ) {
-        dbgmsg( 'Property "' + property + '" already exists in entry "' + uuid + '", aborting.' );
-        return false;
+      if ( value instanceof Array ) {
+        entryproperties[ property ] = value.slice();
+      } else {
+        entryproperties[ property ] = value;
       }
-      entryproperties[ property ] = null;
+
       return property_has( uuid, property );
     }
 
     /**
-     * Update entry's property with a value. Any value other than string, number, boolean, null or array will cause the function to abort.
+     * Update entry's property with a new value.
+     * Any value other than string, number, boolean, null or array will cause the function to abort.
      * @param {string}                             uuid     entry unique identifier.
      * @param {string}                             property entry's property name.
-     * @param {(string|number|boolean|null|any[])} value    entry's property name.
+     * @param {(string|number|boolean|null|any[])} value    entry's property value.
      * @type {boolean}
      * @return {boolean} true if successful, false otherwise.
      */
     function property_update( uuid, property, value ) {
       var entryproperties, entrypermissions;
-      partition_valid();
-      if ( destroyed ) {
-        logmsg( destroyedmsg );
+      if ( partition_invalid() ) {
         return false;
       }
+
       uuid = String( uuid );
       property = String( property );
-      // Make sure entry exists
       if ( ! entry_has( uuid ) ) {
-        property_add( uuid, property );
+        dbgmsg( partmsgprefix + ' Update property failed, entry "' + uuid + '" not available.' );
+        return false;
       }
       if ( !( value === null || isString( value ) || isNumber( value ) ||  isBoolean( value ) || value instanceof Array ) ) {
-        dbgmsg( 'unsupported value parameter type. Aborting.' );
+        dbgmsg( partmsgprefix + 'Update property failed, unsupported value type. Aborting.' );
         return false;
       }
 
@@ -508,16 +520,18 @@
      */
     function property_remove( uuid, property ) {
       var entryproperties, entrypermissions;
-      partition_valid();
-      if ( destroyed ) {
-        logmsg( destroyedmsg );
+      if ( partition_invalid() ) {
         return false;
       }
+
       uuid = String( uuid );
       property = String( property );
-      // Make sure entry exists
       if ( ! entry_has( uuid ) ) {
-        dbgmsg( 'Entry does not exist in the current partition. Aborting.' );
+        dbgmsg( partmsgprefix + ' Remove property failed, entry "' + uuid + '" not available.' );
+        return false;
+      }
+      if ( ! property_has( uuid, property ) ) {
+        dbgmsg( partmsgprefix + 'Remove property failed, property "' + property + '" does not exist in entry "' + uuid + '".' );
         return false;
       }
 
@@ -526,7 +540,7 @@
 
       delete entryproperties[ property ];
 
-      return property_has( uuid, property );
+      return ! property_has( uuid, property );
     }
 
     /**
@@ -539,17 +553,18 @@
      */
     function property_read( uuid, property, defaultvalue ) {
       var entryproperties, entrypermissions, res;
-      partition_valid();
-      if ( destroyed ) {
-        logmsg( destroyedmsg );
+      if ( partition_invalid() ) {
         return void 0;
       }
+
       uuid = String( uuid );
       property = String( property );
       if ( ! entry_has( uuid ) ) {
+        dbgmsg( partmsgprefix + ' Read property failed, entry "' + uuid + '" not available.' );
         return void 0;
       }
       if ( ! property_has( uuid, property ) ) {
+        dbgmsg( partmsgprefix + 'Read property failed, property "' + property + '" does not exist in entry "' + uuid + '".' );
         return void 0;
       }
 
@@ -561,6 +576,7 @@
       } else {
         res = entryproperties[ property ];
       }
+
       return res;
     }
 
@@ -572,13 +588,13 @@
      */
     function property_list( uuid ) {
       var entryproperties, entrypermissions;
-      partition_valid();
-      if ( destroyed ) {
-        logmsg( destroyedmsg );
+      if ( partition_invalid() ) {
         return [];
       }
+
       uuid = String( uuid );
       if ( ! entry_has( uuid ) ) {
+        dbgmsg( partmsgprefix + ' List properties failed, entry "' + uuid + '" not available.' );
         return [];
       }
 
