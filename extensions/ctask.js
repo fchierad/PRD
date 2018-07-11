@@ -9,7 +9,7 @@
  */
 (function IIFE() {
   "use strict";
-  var arr, major, minor, patch, initref, storage, logmsg, dbgmsg, isString, mainpartitionname, msgprefix;
+  var arr, major, minor, patch, initref, storage, logmsg, dbgmsg, isString, isNumber, isBoolean, mainpartitionname, msgprefix;
   storage = {};
   mainpartitionname = 'ctask_main_partition';
   msgprefix = 'ctask: '; // PRefix for module's logmsg & dbgmsg function calls.
@@ -155,10 +155,14 @@
       dbgmsg( msgprefix + 'Main partition "' + mainpartitionname + '" cannot be destroyed.' );
       return false;
     }
-    // Delete storage partition
-    if ( partition_exists( id ) ) {
-      delete storage[ id ];
+
+    if ( ! partition_exists( id ) ) {
+      dbgmsg( msgprefix + 'Could not find partition "' + id + '".' );
+      return false;
     }
+
+    delete storage[ id ];
+
     return ! partition_exists( id );
   }
 
@@ -224,7 +228,7 @@
       if ( partition_exists( id ) ) {
         delete storage[ id ];
       }
-      // Clears local PArtitionAPI instance
+      // Clears local PartitionAPI instance
       Object.keys( PartitionAPI ).forEach( function clearAPI( key ) {
         delete PartitionAPI[ key ];
       });
