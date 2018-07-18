@@ -4,7 +4,7 @@
 Simple module to assist on workflow development.<br/>Created to be imported in Overview > Global Scripts and used on both forms and engine.<br/>v1.0.5 breaking change - Compare() and Unique() renamed to compare() and unique() as per #20 .<br/>
 
 **Kind**: global namespace  
-**Version**: 1.0.6  
+**Version**: 1.0.7  
 **License**: MIT License  
 
 * [PRD](#PRD) : <code>object</code>
@@ -26,6 +26,7 @@ Simple module to assist on workflow development.<br/>Created to be imported in 
         * [.basicHTTPauthHeader(username, password)](#PRD.util.basicHTTPauthHeader) ⇒ <code>string</code>
         * [.shouldRetry(curcounter, maxretries)](#PRD.util.shouldRetry) ⇒ <code>boolean</code>
         * [.compare(list1, list2, ignorecase)](#PRD.util.compare) ⇒ <code>Array.&lt;Array.&lt;string&gt;&gt;</code>
+        * [.intersectArrays(arr, ignorecase)](#PRD.util.intersectArrays) ⇒ <code>Array.&lt;string&gt;</code>
         * [.unique(obj, ignorecase)](#PRD.util.unique) ⇒ <code>Array.&lt;string&gt;</code> \| <code>java.util.Vector</code>
         * [.getObject2arr(list)](#PRD.util.getObject2arr) ⇒ <code>array.&lt;(object\|string)&gt;</code> \| <code>null</code>
         * [.JavaVectorToECMAArray(v)](#PRD.util.JavaVectorToECMAArray) ⇒ <code>Array.&lt;string&gt;</code>
@@ -67,6 +68,7 @@ Utility functions for use in  Identity Manager work flow development.
     * [.basicHTTPauthHeader(username, password)](#PRD.util.basicHTTPauthHeader) ⇒ <code>string</code>
     * [.shouldRetry(curcounter, maxretries)](#PRD.util.shouldRetry) ⇒ <code>boolean</code>
     * [.compare(list1, list2, ignorecase)](#PRD.util.compare) ⇒ <code>Array.&lt;Array.&lt;string&gt;&gt;</code>
+    * [.intersectArrays(arr, ignorecase)](#PRD.util.intersectArrays) ⇒ <code>Array.&lt;string&gt;</code>
     * [.unique(obj, ignorecase)](#PRD.util.unique) ⇒ <code>Array.&lt;string&gt;</code> \| <code>java.util.Vector</code>
     * [.getObject2arr(list)](#PRD.util.getObject2arr) ⇒ <code>array.&lt;(object\|string)&gt;</code> \| <code>null</code>
     * [.JavaVectorToECMAArray(v)](#PRD.util.JavaVectorToECMAArray) ⇒ <code>Array.&lt;string&gt;</code>
@@ -298,6 +300,20 @@ Coerces the result to an ECMA string.<br/>Coercion rules for this function:<br/
 | list1 | <code>Array.&lt;string&gt;</code> \| <code>java.util.Vector</code> | ECMA Array or Java Vector. |
 | list2 | <code>Array.&lt;string&gt;</code> \| <code>java.util.Vector</code> | ECMA Array or Java Vector. |
 | ignorecase | <code>boolean</code> | Changes string comparison to case insensitive.                                                    This also causes the casing of the results will match the casing of their                                                    first time appearing in the list provided. |
+
+<a name="PRD.util.intersectArrays"></a>
+
+#### util.intersectArrays(arr, ignorecase) ⇒ <code>Array.&lt;string&gt;</code>
+(Form) Compares 2 or more unidimensional ECMA Arrays within an Array and returns an Array with intersecting results.
+
+**Kind**: static method of [<code>util</code>](#PRD.util)  
+**Returns**: <code>Array.&lt;string&gt;</code> - ECMA Array of intersecting results.  
+**Since**: 1.0.7  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| arr | <code>Array.&lt;Array.&lt;string&gt;&gt;</code> | ECMA Array of arrays. |
+| ignorecase | <code>boolean</code> | Changes string comparison to case insensitive.                                        This also causes the casing of the results will match the casing of their                                        first time appearing in the list provided. |
 
 <a name="PRD.util.unique"></a>
 
