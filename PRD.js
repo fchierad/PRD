@@ -3,7 +3,7 @@
  * Created to be imported in Overview > Global Scripts and used on both forms and engine.<br/>
  * v1.0.5 breaking change - Compare() and Unique() renamed to compare() and unique() as per #20 .<br/>
  * @namespace PRD
- * @version 1.0.5
+ * @version 1.0.6
  * @license MIT License
  */
 var PRD = (function IIFE(logprefix, verbosemsg) {
@@ -19,13 +19,14 @@ var PRD = (function IIFE(logprefix, verbosemsg) {
         get: JSONget,
         test: JSONtest
       },
-      compare: compare,
+      compare:compare,
       intersectArrays: intersectArrays,
-      unique: unique,
-      inspectType: inspectType,
-      isString: isString,
-      isNumber: isNumber,
-      isBoolean: isBoolean
+      unique:unique,
+      inspectType:inspectType,
+      isString:isString,
+      isNumber:isNumber,
+      isBoolean:isBoolean,
+      debugmsg:debugmsg,
     },
     debugmessages: debugmessages,
     setlogprefix: setlogprefix,
@@ -44,7 +45,7 @@ var PRD = (function IIFE(logprefix, verbosemsg) {
    * @return {string} Module's version in the format M.m.p (Major, minor, patch)
    */
   function version() {
-    return '1.0.5';
+    return '1.0.6';
   }
 
   /**
@@ -145,16 +146,18 @@ var PRD = (function IIFE(logprefix, verbosemsg) {
   /**
    * Sets library in debug mode. The other way to do so is to pass true as the second parameter on the library import.
    *
-   * @memberof PRD.web
+   * @memberof PRD
    * @since 1.0.5
    *
    * @param {boolean} bool  true to set the library to debug mode, false to disable debug more.
    */
-  function debugmessages(bool) {
-    if (bool === true) {
+  function debugmessages( bool ) {
+    if ( bool === true ) {
+      logerror( 'Debug messages enabled.' );
       debug = true;
     }
-    if (bool === false) {
+    if ( bool === false ) {
+      logerror( 'Debug messages disabled.' );
       debug = false;
     }
   }
@@ -230,8 +233,9 @@ var PRD = (function IIFE(logprefix, verbosemsg) {
   /**
    * Output debug message via logerror() only if the internal variable debug is set to true
    *
+   * @memberof PRD.util
    * @since 1.0.3
-   * @private
+   *
    * @param {string}  str   String input.
    */
   function debugmsg(str) {
