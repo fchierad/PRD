@@ -59,7 +59,7 @@
         isString = function (i) {return ( typeof i === 'string' || ( typeof i === 'object' && i instanceof String ) ); };
         isNumber = function (i) {return ( typeof i === 'number' || ( typeof i === 'object' && i instanceof Number ) ); };
         isBoolean = function (i) {return ( typeof i === 'boolean' || ( typeof i === 'object' && i instanceof Boolean ) ); };
-        window.ctask = partition_create( msgprefix, storage, 'ctask_main_partition', 'basic' );
+        window.ctask = partition_create( msgprefix, storage, mainpartitionname, 'basic' );
         initref = window.ctask;
       }
     }
@@ -78,7 +78,7 @@
    * @return {string} Module's version in the format M.m.p (Major, minor, patch)
    */
   function version() {
-    return 'Alpha 4';
+    return 'Alpha 5';
   }
 
   // === Partition ===
@@ -297,7 +297,7 @@
       //permissions:{}, // Only used in 'extended' partitions
       properties:{} // Entry properties
     };
-    return entry_has( uuid );
+    return entry_has( prefix, dstore, id, uuid );
   }
 
   /**
@@ -321,7 +321,7 @@
     }
     entries = entry_data_ref( prefix, dstore, id );
     delete entries[ uuid ];
-    return ! entry_has( uuid );
+    return ! entry_has( prefix, dstore, id, uuid );
   }
 
   /**
