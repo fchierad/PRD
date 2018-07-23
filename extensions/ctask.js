@@ -78,7 +78,7 @@
    * @return {string} Module's version in the format M.m.p (Major, minor, patch)
    */
   function version() {
-    return 'Alpha 5';
+    return 'Alpha 7';
   }
 
   // === Partition ===
@@ -648,7 +648,7 @@
    */
   function getEntryReference( prefix, dstore, id, type, uuid ) {
     var EntryAPI;
-    if ( partition_exists( prefix, dstore, id ) ) {
+    if ( ! partition_exists( prefix, dstore, id ) ) {
       return null;
     }
     if ( type !== 'full' && type !== 'readonly' ) {
