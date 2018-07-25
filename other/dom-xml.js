@@ -8,11 +8,10 @@
  *    and return boolean false (check for it before using the object).
  */
 function xml2dom( xmlstr ) {
-  var parser, charset, is, dom = false;
+  var parser, is, dom = false;
   try {
     parser = new Packages.javax.xml.parsers.DocumentBuilderFactory.newInstance().newDocumentBuilder();
-    charset = Packages.java.nio.charset.StandardCharsets.UTF_8;
-    is = new Packages.java.io.ByteArrayInputStream( java.lang.String( xmlstr ).getBytes( charset ) );
+    is = new Packages.java.io.ByteArrayInputStream( java.lang.String( xmlstr ).getBytes( 'utf-8' ) );
     dom = parser.parse( is );
   } catch( e ) {
     java.lang.System.out.println( process.getRequestId() + ': xml2dom(): ' + e.message );
