@@ -7,13 +7,12 @@
  * @returns JSON stringified representation of the mapping table.
  */
 function mt2json( mtxml ) {
-  var mt, obj, ic, ir, topnode, coldefs, header, name, type, rows, value;
-  mt = xml2dom( mtxml );
+  var mt, obj, ic, ir, topnode, coldefs, header, name, type, rows, row, col, value;
   obj = {
     table:{}, // column name:[ values ]
     header:{} // column name:'column type'
   };
-
+  mt = xml2dom( mtxml );
   if ( mt ) {
     if ( mt.nodeName === 'mapping-table' ) {
       topnode = mt;
@@ -22,22 +21,24 @@ function mt2json( mtxml ) {
       topnode = mt.firstChild;
     }
   } else {
-    //return '';
+    return '';
   }
 
   coldefs = topnode.getElementsByTagName( 'col-def' );
   rows = topnode.getElementsByTagName( 'row' );
 
   for (ic=0; ic < coldefs.length; ic++) {
-    // setup column head
+    // setup column headers
     header = coldefs.item(ic);
     name = header.getAttribute('name');
     type = header.getAttribute('type');
     obj.header[ name ] = type;
     obj.table[ name ] = [];
-    // fetch column values
+    // fetch column values from the rows
     for (ir=0; ir < rows.length; ir++) {
-      value = rows.item(ir).children.item(ic).textContent; // type:case
+      row = rows.item(ir);
+      col = row.getElementsByTagName( 'col' ).item(ic);
+      value = String( col.textContent ); // type:case
       if ( type === 'nocase' ) {
         value = value.toLowerCase();
       }

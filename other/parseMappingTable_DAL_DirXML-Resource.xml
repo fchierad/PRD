@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?><driver-configuration config-type="app-config" dn="cn=rbpm,cn=driverset1,o=system" driver-set-dn="cn=driverset1,o=system" name="rbpm">
+    <children>
+        <provisioning>
+            <ds-object ds-object-class="srvprvAppConfig" ds-object-name="AppConfig">
+                <ds-attribute ds-attr-name="Version">
+                    <ds-value>4.5</ds-value>
+                </ds-attribute>
+                <ds-object ds-object-class="nrfAuthTypes" ds-object-name="AuthTypes">
+                    <ds-attributes/>
+                </ds-object>
+                <ds-object ds-object-class="nrfUIConfig" ds-object-name="UIConfig">
+                    <ds-attributes/>
+                    <ds-object ds-object-class="nrfNavItems" ds-object-name="NavItems">
+                        <ds-attributes/>
+                    </ds-object>
+                </ds-object>
+                <ds-object ds-object-class="srvprvAppDefs" ds-object-name="AppDefs">
+                    <ds-attributes/>
+                </ds-object>
+                <ds-object ds-object-class="srvprvDirectoryModel" ds-object-name="DirectoryModel">
+                    <ds-attributes/>
+                    <ds-object ds-object-class="srvprvChoiceDefs" ds-object-name="ChoiceDefs">
+                        <ds-attributes/>
+                    </ds-object>
+                    <ds-object ds-object-class="srvprvEntityDefs" ds-object-name="EntityDefs">
+                        <ds-attributes/>
+                        <ds-object ds-object-class="srvprvEntity" ds-object-name="DirXML-Resource">
+                            <ds-attributes>
+                                <ds-attribute ds-attr-name="Description">
+                                    <ds-value>DirXML-Resource</ds-value>
+                                </ds-attribute>
+                                <ds-attribute ds-attr-name="srvprvEntityType">
+                                    <ds-value>P</ds-value>
+                                </ds-attribute>
+                                <ds-attribute ds-attr-name="XMLData">
+                                    <ds-value><![CDATA[PGVudGl0eS1kZWZpbml0aW9uIHhtbG5zOnhzaT0iaHR0cDovL3d3dy53My5vcmcvMjAwMS9YTUxTY2hlbWEtaW5zdGFuY2UiCiAgICAgICAgeHNpOm5vTmFtZXNwYWNlU2NoZW1hTG9jYXRpb249Ii4uLy4uLy4uLy4uLy4uLy4uLy4uL3htbC12YWxpZGF0aW9uL2NvbmYvc2NoZW1hL0RpcmVjdG9yeU1vZGVsWG1sRGF0YTNfNV8wLnhzZCI+Cgk8ZW50aXR5CiAgICAgICAgYXV0by1xdWVyeT0iZmFsc2UiIGNyZWF0YWJsZT0idHJ1ZSIgZWRpdGFibGU9InRydWUiCiAgICAgICAgcHJvdGVjdGVkPSJmYWxzZSIgcmVtb3ZhYmxlPSJ0cnVlIiBzeXN0ZW09ImZhbHNlIgogICAgICAgICAgICB2aWV3YWJsZT0idHJ1ZSI+CiAgICAgICAgPGRpc3BsYXkKICAgICAgICAgICAgeG1sOmxhbmc9ImVuIj4KICAgICAgICAgICAgPGxhYmVsPkRpclhNTC1SZXNvdXJjZTwvbGFiZWw+CiAgICAgICAgPC9kaXNwbGF5PgogICAgICAgIDxvYmplY3QtY2xhc3MKICAgICAgICAgICAgYXV4aWxpYXJ5PSJmYWxzZSIKICAgICAgICAgICAgc2VhcmNoPSJmYWxzZSI+CiAgICAgICAgICAgIDxsZGFwLW5hbWU+RGlyWE1MLVJlc291cmNlPC9sZGFwLW5hbWU+CiAgICAgICAgICAgIDxuZHMtbmFtZT5EaXJYTUwtUmVzb3VyY2U8L25kcy1uYW1lPgogICAgICAgIDwvb2JqZWN0LWNsYXNzPgkJCgk8L2VudGl0eT4KCTxhdHRyaWJ1dGVzPgogICAgICAgIDxhdHRyaWJ1dGUKICAgICAgICAgICAgZWRpdGFibGU9InRydWUiIGVuYWJsZWQ9InRydWUiIGhpZGVhYmxlPSJmYWxzZSIKICAgICAgICAgICAgbXVsdGl2YWx1ZT0iZmFsc2UiIHByb3RlY3RlZD0iZmFsc2UiIHJlYWRhYmxlPSJ0cnVlIgogICAgICAgICAgICByZXF1aXJlZD0idHJ1ZSIgc2VhcmNoYWJsZT0iZmFsc2UiCiAgICAgICAgICAgICAgICB2aWV3YWJsZT0idHJ1ZSI+CiAgICAgICAgICAgIDxrZXk+RGlyWE1MLURhdGE8L2tleT4KICAgICAgICAgICAgPGxkYXAtbmFtZT5EaXJYTUwtRGF0YTwvbGRhcC1uYW1lPgogICAgICAgICAgICA8bmRzLW5hbWU+RGlyWE1MLURhdGE8L25kcy1uYW1lPgogICAgICAgICAgICA8ZGlzcGxheQogICAgICAgICAgICB4bWw6bGFuZz0iZW4iPgogICAgICAgICAgICAgICAgPGxhYmVsPkRpclhNTC1EYXRhPC9sYWJlbD4KICAgICAgICAgICAgPC9kaXNwbGF5PgogICAgICAgICAgICA8dHlwZT5TdHJlYW08L3R5cGU+CiAgICAgICAgPC9hdHRyaWJ1dGU+CiAgICAgICAgPGF0dHJpYnV0ZQogICAgICAgICAgICBlZGl0YWJsZT0idHJ1ZSIgZW5hYmxlZD0idHJ1ZSIgaGlkZWFibGU9ImZhbHNlIgogICAgICAgICAgICBtdWx0aXZhbHVlPSJmYWxzZSIgcHJvdGVjdGVkPSJmYWxzZSIgcmVhZGFibGU9InRydWUiCiAgICAgICAgICAgIHJlcXVpcmVkPSJ0cnVlIiBzZWFyY2hhYmxlPSJ0cnVlIgogICAgICAgICAgICAgICAgdmlld2FibGU9InRydWUiPgogICAgICAgICAgICA8a2V5PkRpclhNTC1Db250ZW50VHlwZTwva2V5PgogICAgICAgICAgICA8bGRhcC1uYW1lPkRpclhNTC1Db250ZW50VHlwZTwvbGRhcC1uYW1lPgogICAgICAgICAgICA8bmRzLW5hbWU+RGlyWE1MLUNvbnRlbnRUeXBlPC9uZHMtbmFtZT4KICAgICAgICAgICAgPGRpc3BsYXkgeG1sOmxhbmc9ImVuIj4KICAgICAgICAgICAgICAgIDxsYWJlbD5EaXJYTUwtQ29udGVudFR5cGU8L2xhYmVsPgogICAgICAgICAgICA8L2Rpc3BsYXk+CiAgICAgICAgICAgIDx0eXBlPlN0cmluZzwvdHlwZT4KICAgICAgICA8L2F0dHJpYnV0ZT4JCQoJPC9hdHRyaWJ1dGVzPgo8L2VudGl0eS1kZWZpbml0aW9uPgo=]]></ds-value>
+                                </ds-attribute>
+                            </ds-attributes>
+                        </ds-object>
+                    </ds-object>
+                    <ds-object ds-object-class="srvprvQueryDefs" ds-object-name="QueryDefs">
+                        <ds-attributes/>
+                    </ds-object>
+                    <ds-object ds-object-class="srvprvRelationshipDefs" ds-object-name="RelationshipDefs">
+                        <ds-attributes/>
+                    </ds-object>
+                </ds-object>
+                <ds-object ds-object-class="srvprvRequestDefs" ds-object-name="RequestDefs">
+                    <ds-attributes/>
+                </ds-object>
+                <ds-object ds-object-class="nrfConfig" ds-object-name="RoleConfig">
+                    <ds-attributes/>
+                    <ds-object ds-object-class="nrfAttestations" ds-object-name="Attestations">
+                        <ds-attributes/>
+                    </ds-object>
+                    <ds-object ds-object-class="nrfReportDefs" ds-object-name="ReportDefs">
+                        <ds-attributes/>
+                    </ds-object>
+                    <ds-object ds-object-class="nrfResourceDefs" ds-object-name="ResourceDefs">
+                        <ds-attributes/>
+                    </ds-object>
+                    <ds-object ds-object-class="nrfRoleDefs" ds-object-name="RoleDefs">
+                        <ds-attributes/>
+                        <ds-object ds-object-class="nrfRoleDefs" ds-object-name="Level10">
+                            <ds-attributes/>
+                        </ds-object>
+                        <ds-object ds-object-class="nrfRoleDefs" ds-object-name="Level20">
+                            <ds-attributes/>
+                            <ds-object ds-object-class="nrfRoleDefs" ds-object-name="System">
+                                <ds-attributes/>
+                            </ds-object>
+                        </ds-object>
+                        <ds-object ds-object-class="nrfRoleDefs" ds-object-name="Level30">
+                            <ds-attributes/>
+                        </ds-object>
+                    </ds-object>
+                    <ds-object ds-object-class="nrfResourceAssociations" ds-object-name="ResourceAssociations">
+                        <ds-attributes/>
+                    </ds-object>
+                    <ds-object ds-object-class="nrfResourceRequests" ds-object-name="ResourceRequests">
+                        <ds-attributes/>
+                    </ds-object>
+                    <ds-object ds-object-class="nrfSODDefs" ds-object-name="SoDDefs">
+                        <ds-attributes/>
+                    </ds-object>
+                </ds-object>
+                <ds-object ds-object-class="srvprvTeamDefs" ds-object-name="TeamDefs">
+                    <ds-attributes/>
+                </ds-object>
+            </ds-object>
+        </provisioning>
+    </children></driver-configuration>
