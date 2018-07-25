@@ -9,7 +9,6 @@
  * @type {object}
  * @returns ECMA object with HTTP response status, headers and body as direct properties.
  */
-
 function httpget( uri, user, pwd, headers ) {
   var JString, method, creds;
   JString = java.lang.String;
@@ -32,7 +31,6 @@ function httpget( uri, user, pwd, headers ) {
  * @type {object}
  * @returns ECMA object with HTTP response status, headers and body as direct properties.
  */
-
 function httppost( uri, user, pwd, headers, content, conttype, charset ) {
   var JString, method, creds;
   JString = java.lang.String;
