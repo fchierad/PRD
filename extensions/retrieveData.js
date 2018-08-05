@@ -193,7 +193,7 @@
           res[ attribute ] = cache[ ldapdn ][ attribute ].slice();
           dbgmsg( fname + 'from Session cache: Attribute: "' + attribute + '", Value(s): "' + res[ attribute ].join( '"; "' ) + '"' );
         } else {
-          res[ attribute ] = PRD.IDVget( ldapdn, 'user', attribute );
+          res[ attribute ] = PRD.IDVget( ldapdn, dalEntity, attribute );
           cache[ ldapdn ][ attribute ] = res[ attribute ].slice();
           dbgmsg( fname + 'from IDVault.get: Attribute: "' + attribute + '", Value(s): "' + res[ attribute ].join( '"; "' ) + '"' );
         }
