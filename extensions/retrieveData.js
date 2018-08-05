@@ -5,7 +5,7 @@
  * Module loads as PRD.extensions.retrieveData<br/>
  * @module retrieveData
  * @requires PRD
- * @version 1.0.1
+ * @version 1.0.2
  * @license MIT License
  */
 (function IIFE() {
@@ -53,7 +53,7 @@
    * @return {string} Module's version in the format M.m.p (Major, minor, patch)
    */
   function version() {
-    return '1.0.1';
+    return '1.0.2';
   }
 
   /**
