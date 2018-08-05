@@ -37,14 +37,14 @@
           PRD.extensions = {};
         }
         if ( ! PRD.extensions.ctask ) {
-          PRD.extensions.ctask = partition_create( msgprefix, storage, mainpartitionname, 'basic' );
-          initref = PRD.extensions.ctask;
           // Function abstractions for easier refactoring
           logmsg = PRD.util.logerror;
           dbgmsg = PRD.util.debugmsg;
           isString = PRD.util.isString;
           isNumber = PRD.util.isNumber;
           isBoolean = PRD.util.isBoolean;
+          PRD.extensions.ctask = partition_create( msgprefix, storage, mainpartitionname, 'basic' );
+          initref = PRD.extensions.ctask;
           logmsg( 'Module loaded: PRD.extensions.ctask version ' + version() );
         }
       } else {
@@ -78,7 +78,7 @@
    * @return {string} Module's version in the format M.m.p (Major, minor, patch)
    */
   function version() {
-    return 'Alpha 7';
+    return 'Alpha 8';
   }
 
   // === Partition ===
