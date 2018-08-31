@@ -3,7 +3,7 @@
  * Created to be imported in Overview > Global Scripts and used on both forms and engine.<br/>
  * v1.0.5 breaking change - Compare() and Unique() renamed to compare() and unique() as per #20 .<br/>
  * @namespace PRD
- * @version 1.0.7
+ * @version 1.0.8
  * @license MIT License
  */
 var PRD = (function IIFE( logprefix, verbosemsg ) {
@@ -25,7 +25,7 @@ var PRD = (function IIFE( logprefix, verbosemsg ) {
       isString:isString,
       isNumber:isNumber,
       isBoolean:isBoolean,
-      debugmsg:debugmsg,
+      debugmsg:debugmsg
     },
     debugmessages:debugmessages,
     setlogprefix:setlogprefix,
@@ -44,7 +44,7 @@ var PRD = (function IIFE( logprefix, verbosemsg ) {
    * @return {string} Module's version in the format M.m.p (Major, minor, patch)
    */
   function version() {
-    return '1.0.7';
+    return '1.0.8';
   }
 
   /**
@@ -54,7 +54,7 @@ var PRD = (function IIFE( logprefix, verbosemsg ) {
    * @since 1.0.0
    */
 
-    /**
+  /**
    * Proxy for the actual JSON object used in browsers (JSON) or workflow engine (ScriptVault.JSON).<br/>
    * Wraps the parse() and stringify() calls in try/catch blocks to report errors via logerror() instead of
    * letting the workflow engine break its regular flow when an error occurs.
@@ -370,7 +370,7 @@ var PRD = (function IIFE( logprefix, verbosemsg ) {
     return ( input != null && typeof input === 'object' && 'getClass' in input && input.getClass() == 'class java.util.Vector' );
   }
 
-   /**
+  /**
    * (Form only) Initializes references to the RBPM/IDMAPPS framework objects and save the same in the internal storage.<br/>
    * Uses IDVault internally on IDVget(), IDVglobalQuery(), GCVget(), getNamedPassword().<br/>
    * Exports field as PRD.web.field and form as PRD.web.form for usage inside global scripts.<br/>
@@ -531,13 +531,13 @@ var PRD = (function IIFE( logprefix, verbosemsg ) {
   function fieldVisibility( event, field ) {
     var action = String( event.getCustomData() );
     switch ( action.toLowerCase() ) {
-      case 'show':
-        field.show();
-        break;
-      case 'hide':
-        field.hide();
-        break;
-      default:
+    case 'show':
+      field.show();
+      break;
+    case 'hide':
+      field.hide();
+      break;
+    default:
       logerror( 'Field: ' + field.getLabel() + ', Event: ' + event.getEventName() + ', Invalid option received: ' + action );
     }
   }
@@ -606,106 +606,106 @@ var PRD = (function IIFE( logprefix, verbosemsg ) {
   }
 
   /**
- * Verify if an ECMA object has the selected location.<br/>
- * Note: To reference properties with a dot in their name use the format ["property.name"] .<br/>
- *
- * Ported from IDM engine to RBPM. IDM Engine version at https://github.com/fchierad/IDM-ECMAlib/blob/v1.0.2/JSONlib-JS.js
- *
- * @function test
- * @memberof PRD.util.JSONobj
- * @since 1.0.3
- *
- * @param {(object|string)}  inputJSON    Input JSON (ECMA object). If a string-serialized JSON is provided it will be converted to a JSON object internally
- * @param {string}           whattotest   Dot-separated list of properties as if you are accessing them via ECMAscript
- *
- * @return {boolean} true if the path is found, false otherwise
- */
-function JSONtest( inputJSON, whattotest ) {
-  var fname, i, itval, itobj, obj, getArr, propName;
-  fname = 'JSONobj.test(): ';
-  // Review input data
-  if ( isString( inputJSON ) ) {
-    obj = JSONparse( inputJSON );
-  } else if ( inputJSON && typeof inputJSON === 'object' ) {
-    obj = inputJSON;
-  } else {
-    logerror( fname + 'parameter inputJSON need to be a string representation of a JSON object or the JSON object itself.' );
-    return false;
-  }
-  if ( isString( whattotest ) ) {
-    getArr = charArrToPropertyNames( stringToCharArray( whattotest ) );
-  } else {
-    logerror( fname + 'parameter whattotest should be a string value.' );
-    return false;
-  }
-  // Iterates through the object using itobj and itval as the middle steps to find the desired result
-  itobj = obj;
-  for ( i = 0; i < getArr.length; i++ ) {
-    propName = getArr[ i ];
-    debugmsg( fname + 'Parsing: "' + propName + '", type: ' + typeof propName );
-    if ( typeof itobj === 'object' && propName in itobj ) {
-      itval = itobj[ propName ];
+   * Verify if an ECMA object has the selected location.<br/>
+   * Note: To reference properties with a dot in their name use the format ["property.name"] .<br/>
+   *
+   * Ported from IDM engine to RBPM. IDM Engine version at https://github.com/fchierad/IDM-ECMAlib/blob/v1.0.2/JSONlib-JS.js
+   *
+   * @function test
+   * @memberof PRD.util.JSONobj
+   * @since 1.0.3
+   *
+   * @param {(object|string)}  inputJSON    Input JSON (ECMA object). If a string-serialized JSON is provided it will be converted to a JSON object internally
+   * @param {string}           whattotest   Dot-separated list of properties as if you are accessing them via ECMAscript
+   *
+   * @return {boolean} true if the path is found, false otherwise
+   */
+  function JSONtest( inputJSON, whattotest ) {
+    var fname, i, itval, itobj, obj, getArr, propName;
+    fname = 'JSONobj.test(): ';
+    // Review input data
+    if ( isString( inputJSON ) ) {
+      obj = JSONparse( inputJSON );
+    } else if ( inputJSON && typeof inputJSON === 'object' ) {
+      obj = inputJSON;
     } else {
-      debugmsg( fname + 'parsing ' + whattotest + ', could not find property "' + propName + '" in the current object location.' );
+      logerror( fname + 'parameter inputJSON need to be a string representation of a JSON object or the JSON object itself.' );
       return false;
     }
-    itobj = itval;
-  }
-  return true;
-}
-
-/**
- * Retrieves a property of an ECMA object (or its subordinate object) and returns it in the specified type.<br/>
- * Note: To reference properties with a dot in their name use the format ["property.name"] .<br/>
- *
- * Ported from IDM engine to RBPM. IDM Engine version at https://github.com/fchierad/IDM-ECMAlib/blob/v1.0.2/JSONlib-JS.js
- *
- * @function get
- * @memberof PRD.util.JSONobj
- * @since 1.0.3
- *
- * @param {(object|string)}  inputJSON     Input JSON (ECMA object). If a string-serialized JSON is provided it will be converted to a JSON object internally
- * @param {string}           whattoget     Dot-separated list of properties as if you are accessing them via ECMAscript
- * @param {string=}          [returntype]  (Optional) Desired return type. Valid values are: string, number, raw. Defaults to raw in case whatever is provided is not one of the 3 valid options
- *
- * @return {(string|number|boolean|object)} Selected property's value in the selected format. If parsing of the object fails returns an empty string
- */
-function JSONget( inputJSON, whattoget, returntype ) {
-  var fname, i, itval, itobj, obj, getArr, propName, res = '';
-  fname = 'JSONobj.get(): ';
-  // Review input data
-  if ( isString( inputJSON ) ) {
-    obj = JSONparse( inputJSON );
-  } else if ( inputJSON && typeof inputJSON === 'object' ) {
-    obj = inputJSON;
-  } else {
-    logerror( fname + 'parameter inputJSON need to be a string representation of a JSON object or the JSON object itself.' );
-    return res;
-  }
-  if ( isString( whattoget ) ) {
-    getArr = charArrToPropertyNames( stringToCharArray( whattoget ) );
-  } else {
-    logerror( fname + 'parameter whattotest should be a string value.' );
-    return res;
-  }
-  if ( returntype !== 'string' && returntype !== 'number' && returntype !== 'raw' ) {
-      returntype = 'raw';
-  }
-  // Iterates through the object using itobj and itval as the middle steps to find the desired result
-  itobj = obj;
-  for ( i = 0; i < getArr.length; i++ ) {
-    propName = getArr[ i ];
-    debugmsg( fname + 'Parsing: "' + propName + '", type: ' + typeof propName );
-    if ( typeof itobj === 'object' && propName in itobj ) {
-      itval = itobj[ propName ];
+    if ( isString( whattotest ) ) {
+      getArr = charArrToPropertyNames( stringToCharArray( whattotest ) );
     } else {
-      logerror( fname + 'parsing ' + whattoget + ', could not find property "' + propName + '" in the current object location.' );
+      logerror( fname + 'parameter whattotest should be a string value.' );
+      return false;
+    }
+    // Iterates through the object using itobj and itval as the middle steps to find the desired result
+    itobj = obj;
+    for ( i = 0; i < getArr.length; i++ ) {
+      propName = getArr[ i ];
+      debugmsg( fname + 'Parsing: "' + propName + '", type: ' + typeof propName );
+      if ( typeof itobj === 'object' && propName in itobj ) {
+        itval = itobj[ propName ];
+      } else {
+        debugmsg( fname + 'parsing ' + whattotest + ', could not find property "' + propName + '" in the current object location.' );
+        return false;
+      }
+      itobj = itval;
+    }
+    return true;
+  }
+
+  /**
+   * Retrieves a property of an ECMA object (or its subordinate object) and returns it in the specified type.<br/>
+   * Note: To reference properties with a dot in their name use the format ["property.name"] .<br/>
+   *
+   * Ported from IDM engine to RBPM. IDM Engine version at https://github.com/fchierad/IDM-ECMAlib/blob/v1.0.2/JSONlib-JS.js
+   *
+   * @function get
+   * @memberof PRD.util.JSONobj
+   * @since 1.0.3
+   *
+   * @param {(object|string)}  inputJSON     Input JSON (ECMA object). If a string-serialized JSON is provided it will be converted to a JSON object internally
+   * @param {string}           whattoget     Dot-separated list of properties as if you are accessing them via ECMAscript
+   * @param {string=}          [returntype]  (Optional) Desired return type. Valid values are: string, number, raw. Defaults to raw in case whatever is provided is not one of the 3 valid options
+   *
+   * @return {(string|number|boolean|object)} Selected property's value in the selected format. If parsing of the object fails returns an empty string
+   */
+  function JSONget( inputJSON, whattoget, returntype ) {
+    var fname, i, itval, itobj, obj, getArr, propName, res = '';
+    fname = 'JSONobj.get(): ';
+    // Review input data
+    if ( isString( inputJSON ) ) {
+      obj = JSONparse( inputJSON );
+    } else if ( inputJSON && typeof inputJSON === 'object' ) {
+      obj = inputJSON;
+    } else {
+      logerror( fname + 'parameter inputJSON need to be a string representation of a JSON object or the JSON object itself.' );
       return res;
     }
-    itobj = itval;
-  }
-  // Inspect returned data and coerce it as needed. No default set since res is set at the start of the function
-  switch ( returntype ) {
+    if ( isString( whattoget ) ) {
+      getArr = charArrToPropertyNames( stringToCharArray( whattoget ) );
+    } else {
+      logerror( fname + 'parameter whattotest should be a string value.' );
+      return res;
+    }
+    if ( returntype !== 'string' && returntype !== 'number' && returntype !== 'raw' ) {
+      returntype = 'raw';
+    }
+    // Iterates through the object using itobj and itval as the middle steps to find the desired result
+    itobj = obj;
+    for ( i = 0; i < getArr.length; i++ ) {
+      propName = getArr[ i ];
+      debugmsg( fname + 'Parsing: "' + propName + '", type: ' + typeof propName );
+      if ( typeof itobj === 'object' && propName in itobj ) {
+        itval = itobj[ propName ];
+      } else {
+        logerror( fname + 'parsing ' + whattoget + ', could not find property "' + propName + '" in the current object location.' );
+        return res;
+      }
+      itobj = itval;
+    }
+    // Inspect returned data and coerce it as needed. No default set since res is set at the start of the function
+    switch ( returntype ) {
     case 'string':
       res = String( itval );
       break;
@@ -715,11 +715,9 @@ function JSONget( inputJSON, whattoget, returntype ) {
     case 'raw':
       res = itval;
       break;
+    }
+    return res;
   }
-  return res;
-}
-
-//  https://github.com/fchierad/IDM-ECMAlib/blob/v1.0.2/JSONlib-JS.md#JSONget
 
   /**
    * Unicode-safe split of a string to a character Array.<br/>
@@ -760,7 +758,7 @@ function JSONget( inputJSON, whattoget, returntype ) {
    * @return {Array<(string|number)>} property names array
    */
   function charArrToPropertyNames( cArr ) {
-    var i, fname, currentName, squaremark, re_whitespace, re_number, re_quotes, property = [];
+    var i, fname, currentName, squaremark, re_number, re_quotes, property = [];
     fname = 'charArrToPropertyNames(): ';
     if ( !( cArr instanceof Array ) ) {
       logerror( fname + 'Input parameter is not an Array, aborting.' );
@@ -929,7 +927,7 @@ function JSONget( inputJSON, whattoget, returntype ) {
    */
   function compare( list1, list2 ,ignorecase ) {
     var exists1 = {}, exists2 = {}, onlyin1 = [], onlyin2 = [], isinboth = [], res,
-    i, curr, compare, fname, dedup1 = [];
+      i, curr, compare, fname, dedup1 = [];
     fname = 'Unique(): ';
     if ( list1 != null && typeof list1 === 'object' && list2 != null && typeof list2 === 'object' ) {
       // (Engine only) Convert Vector to Array so we can perform the comparisons.
@@ -997,7 +995,7 @@ function JSONget( inputJSON, whattoget, returntype ) {
     return res;
   }
 
- /**
+  /**
    * (Form) Compares 2 or more unidimensional ECMA Arrays within an Array and returns an Array with intersecting results.
    * @memberof PRD.util
    * @since 1.0.7
@@ -1098,8 +1096,8 @@ function JSONget( inputJSON, whattoget, returntype ) {
    * @type {(array.<(object|string)>|null)}
    * @return {(array.<(object|string)>|null)} ECMA Array of objects and string. If error occur returns null.
    */
-  function getObject2arr( list, onelvl ) {
-    var res, fname, initialnode, currnode, nodename, childnodes, preprocess, removeobj;
+  function getObject2arr( list ) {
+    var res, fname, initialnode, currnode, nodename, preprocess, removeobj;
     fname = 'getObject2arr(): ';
     res = null; removeobj = true;
 
@@ -1118,8 +1116,8 @@ function JSONget( inputJSON, whattoget, returntype ) {
       res = [ {} ];
       preprocess = {};
       while ( currnode ) {
-        // Text nodes are appended as is to the current level
-        if ( currnode.getNodeType() == getNodeTypes.nodetype.Text ) {
+        // Text nodes are appended as is to the current level. Added CDATA support
+        if ( currnode.getNodeType() == getNodeTypes.nodetype.Text || currnode.getNodeType() == getNodeTypes.nodetype.CDATASection ) {
           if ( shouldProcessNode( currnode ) ) {
             debugmsg( fname + 'found text node. getNodeValue(): "' + currnode.getNodeValue() + '"' );
             res.push( String( currnode.getNodeValue() ) );
@@ -1170,7 +1168,7 @@ function JSONget( inputJSON, whattoget, returntype ) {
     if ( typeof node === 'object' && node.getNodeType() == getNodeTypes.nodetype.Element ) {
       return true;
     }
-    if ( typeof node === 'object' && node.getNodeType() == getNodeTypes.nodetype.Text ) {
+    if ( typeof node === 'object' && ( node.getNodeType() == getNodeTypes.nodetype.Text  || node.getNodeType() == getNodeTypes.nodetype.CDATASection ) ) {
       if ( node.getNodeValue().length === 1 && node.getNodeValue().charCodeAt( 0 ) === 10 ) {
         return false;
       } else {
@@ -1207,7 +1205,7 @@ function JSONget( inputJSON, whattoget, returntype ) {
             debugmsg( fname + 'array index ' + i + ': processing child node ' + j );
             childnode = childnodes.item( j );
             // Text nodes are appended as is to the current level
-            if ( childnode.getNodeType() == getNodeTypes.nodetype.Text ) {
+            if ( childnode.getNodeType() == getNodeTypes.nodetype.Text  || childnode.getNodeType() == getNodeTypes.nodetype.CDATASection  ) {
               if ( shouldProcessNode( childnode ) ) {
                 debugmsg( fname + 'Found text node. getNodeValue(): "' + childnode.getNodeValue() + '"' );
                 res.push( String( childnode.getNodeValue() ) );
@@ -1354,8 +1352,8 @@ function JSONget( inputJSON, whattoget, returntype ) {
    */
   function IDVget( ldapdn, entkey, attrkey, fieldname ) {
     // Variable declaration. Keep all the declarations together.
-    var qres = [];
-    var gattr, gattrV, errmsg, fname;
+    var qres, gattr, errmsg, fname, IDVobj;
+    qres = [];
     fname = 'IDVget(): ';
     // Adjusting function input values based on where it is being executed.
     if ( where === 'engine' ) {
@@ -1431,7 +1429,7 @@ function JSONget( inputJSON, whattoget, returntype ) {
    */
   function IDVglobalQuery( dalquerykey, parameters, fieldname ) {
     // Variable declaration. Keep all the declarations together.
-    var qres, gqr, errmsg, pconv, fname, key, i, treatedparameters;
+    var qres, gqr, errmsg, pconv, fname, key, i, treatedparameters, IDVobj;
     fname = 'IDVglobalQuery(): ';
     qres = [];
     pconv = '';
@@ -1532,12 +1530,12 @@ function JSONget( inputJSON, whattoget, returntype ) {
     }
     // Coerce result as we return it.
     switch( String( returnType ) ) {
-      case 'boolean':
-        return Boolean( ret );
-      case 'number':
-        return Number( ret );
-      default: // case 'string' overlaps with this one
-        return String( ret );
+    case 'boolean':
+      return Boolean( ret );
+    case 'number':
+      return Number( ret );
+    default: // case 'string' overlaps with this one
+      return String( ret );
     }
   }
 

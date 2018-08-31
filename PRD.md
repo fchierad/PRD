@@ -4,7 +4,7 @@
 Simple module to assist on workflow development.<br/>Created to be imported in Overview > Global Scripts and used on both forms and engine.<br/>v1.0.5 breaking change - Compare() and Unique() renamed to compare() and unique() as per #20 .<br/>
 
 **Kind**: global namespace  
-**Version**: 1.0.7  
+**Version**: 1.0.8  
 **License**: MIT License  
 
 * [PRD](#PRD) : <code>object</code>
